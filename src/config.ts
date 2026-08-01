@@ -22,9 +22,11 @@ const envSchema = z.object({
   GROK_MODEL: z.string().default("grok-4.5"),
   GROK_MAX_OUTPUT_TOKENS: z.coerce.number().int().min(200).max(3000).default(900),
   X_MAX_POSTS: z.coerce.number().int().min(2).max(8).default(6),
+  X_SEARCH_CANDIDATES: z.coerce.number().int().min(4).max(24).default(10),
   REDDIT_ENABLED: z.string().default("true").transform((value) => value.toLowerCase() === "true"),
   REDDIT_USER_AGENT: z.string().default("DeckForgeX/0.1 community-research"),
   REDDIT_MAX_POSTS: z.coerce.number().int().min(2).max(8).default(6),
+  REDDIT_SEARCH_CANDIDATES: z.coerce.number().int().min(4).max(24).default(12),
   REDDIT_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30_000).default(8000),
   MOCK_XAI: z
     .string()
@@ -56,9 +58,11 @@ export const config = {
   grokModel: env.GROK_MODEL,
   grokMaxOutputTokens: env.GROK_MAX_OUTPUT_TOKENS,
   xMaxPosts: env.X_MAX_POSTS,
+  xSearchCandidates: env.X_SEARCH_CANDIDATES,
   redditEnabled: env.REDDIT_ENABLED,
   redditUserAgent: env.REDDIT_USER_AGENT,
   redditMaxPosts: env.REDDIT_MAX_POSTS,
+  redditSearchCandidates: env.REDDIT_SEARCH_CANDIDATES,
   redditTimeoutMs: env.REDDIT_TIMEOUT_MS,
   port: env.PORT,
   mockOpenAI: env.MOCK_OPENAI || !env.OPENAI_API_KEY,

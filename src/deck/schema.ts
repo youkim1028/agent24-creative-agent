@@ -5,6 +5,12 @@ export const citationSchema = z.object({
   title: z.string().min(1).max(160),
   handle: z.string().max(80),
   excerpt: z.string().max(280),
+  postedAt: z.string().datetime().nullable().optional(),
+  engagement: z.object({
+    likes: z.number().nonnegative().nullable(),
+    reposts: z.number().nonnegative().nullable(),
+    comments: z.number().nonnegative().nullable(),
+  }).optional(),
 });
 
 export const statSchema = z.object({

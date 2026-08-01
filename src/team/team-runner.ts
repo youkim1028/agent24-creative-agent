@@ -190,6 +190,11 @@ export async function runTeamAgent(request: AgentRequest, runId: string): Promis
     slideCount: request.slideCount,
     language: request.language,
     markets,
+    modelContext: {
+      primaryGenerationModel: config.qualityModel,
+      criticModel: config.criticModel,
+      renderer: "PptxGenJS deterministic renderer",
+    },
   };
 
   const planned = await runRole({

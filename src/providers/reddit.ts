@@ -10,6 +10,20 @@ export interface RedditSearchInput {
   maxPosts?: number;
 }
 
+export function rankRedditPosts(posts: CommunityPost[], limit: number, now = Date.now()): CommunityPost[] {
+  const score = (post: CommunityPost): number => {
+    const popularity = Math.min(1, Math.log1p((post.engagement.score ?? 0) + (post.engagement.comments ?? 0) * 2) / Math.log1p(10_000));
+    const ageDays = post.postedAt ? Math.max(0, (now - Date.parse(post.postedAt)) / 86_400_000) : 365;
+    const recency = ageDays <= 30 ? 1 : ageDays <= 90 ? 0.7 : ageDays <= 365 ? 0.35 : 0;
+    return popularity * 0.65 + recency * 0.35;
+  };
+  return posts
+    .map((post, index) => ({ post, index }))
+    .sort((left, right) => score(right.post) - score(left.post) || left.index - right.index)
+    .slice(0, limit)
+    .map(({ post }) => post);
+}
+
 function detectLanguage(value: string): string {
   if (/[가-힣]/u.test(value)) return "ko";
   if (/[ぁ-んァ-ン]/u.test(value)) return "ja";
@@ -82,7 +96,7 @@ export async function researchReddit(input: RedditSearchInput): Promise<{ posts:
       q: query,
       sort: "relevance",
       t: "year",
-      limit: String(maxPosts),
+      limit: String(config.redditSearchCandidates),
       raw_json: "1",
     });
     const response = await fetch(`https://www.reddit.com/search.json?${params}`, {
@@ -90,7 +104,8 @@ export async function researchReddit(input: RedditSearchInput): Promise<{ posts:
       signal: AbortSignal.timeout(config.redditTimeoutMs),
     });
     if (!response.ok) return { posts: [], warning: `Reddit search returned HTTP ${response.status}.` };
-    const posts = parseRedditSearch(await response.json(), input, maxPosts);
+    const candidates = parseRedditSearch(await response.json(), input, config.redditSearchCandidates);
+    const posts = rankRedditPosts(candidates, maxPosts);
     return { posts, warning: posts.length === 0 ? "Reddit search returned no usable posts." : null };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown Reddit search failure";

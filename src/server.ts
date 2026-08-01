@@ -46,6 +46,8 @@ app.get("/api/health", (_request, response) => {
       grokMaxOutputTokens: config.grokMaxOutputTokens,
       runBudgetTokens: config.agentMaxTotalTokens,
       xMaxPosts: config.xMaxPosts,
+      xSearchCandidates: config.xSearchCandidates,
+      redditSearchCandidates: config.redditSearchCandidates,
     },
     memory: { mode: config.gcsMemoryEnabled ? "gcs" : "disabled" },
     reddit: { mode: config.redditEnabled ? "public-search" : "disabled", maxPosts: config.redditMaxPosts },

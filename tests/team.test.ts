@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseRedditSearch } from "../src/providers/reddit.js";
+import { parseRedditSearch, rankRedditPosts } from "../src/providers/reddit.js";
 import { critiqueReportSchema, researchPlanSchema } from "../src/team/contracts.js";
 import { ART_DIRECTOR_PROMPT, INDEPENDENT_CRITIC_PROMPT } from "../src/team/prompts.js";
 import { modelForTeamAgent } from "../src/team/team-runner.js";
@@ -55,6 +55,21 @@ describe("team architecture contracts", () => {
     expect(posts[0]?.platform).toBe("reddit");
     expect(posts[0]?.community).toBe("r/powerpoint");
     expect(posts[0]?.engagement).toEqual({ score: 42, comments: 11 });
+  });
+
+  it("ranks Reddit candidates by recency and engagement before handoff", () => {
+    const posts = parseRedditSearch({
+      data: { children: [
+        { data: { permalink: "/r/powerpoint/comments/old/old/", title: "Old popular post", author: "old", subreddit: "powerpoint", created_utc: 1_700_000_000, score: 5000, num_comments: 200 } },
+        { data: { permalink: "/r/powerpoint/comments/new/new/", title: "Recent useful post", author: "recent", subreddit: "powerpoint", created_utc: 1_780_000_000, score: 1000, num_comments: 20 } },
+      ] },
+    }, {
+      lane: "design_critique",
+      query: "AI presentation design complaints",
+      markets: [{ country: "United States", searchLanguage: "en" }],
+    }, 2);
+    const ranked = rankRedditPosts(posts, 1, Date.parse("2026-08-01T00:00:00Z"));
+    expect(ranked[0]?.author).toBe("recent");
   });
 
   it("routes team roles to fast, quality, and critic model tiers", () => {

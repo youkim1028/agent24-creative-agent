@@ -28,6 +28,46 @@ export interface XResearchResult {
   warning: string | null;
 }
 
+function numberField(record: Record<string, unknown>, names: string[]): number | null {
+  for (const name of names) {
+    const value = record[name];
+    if (typeof value === "number" && Number.isFinite(value) && value >= 0) return value;
+  }
+  const metrics = record.public_metrics;
+  if (metrics && typeof metrics === "object") {
+    for (const name of names) {
+      const value = (metrics as Record<string, unknown>)[name];
+      if (typeof value === "number" && Number.isFinite(value) && value >= 0) return value;
+    }
+  }
+  return null;
+}
+
+function dateField(record: Record<string, unknown>): string | null {
+  for (const name of ["created_at", "posted_at", "postedAt", "date"]) {
+    const value = record[name];
+    if (typeof value === "string" && !Number.isNaN(Date.parse(value))) return new Date(value).toISOString();
+  }
+  return null;
+}
+
+function rankCitations(citations: Citation[], limit: number): Citation[] {
+  const now = Date.now();
+  const score = (citation: Citation): number => {
+    const likes = citation.engagement?.likes ?? 0;
+    const reposts = citation.engagement?.reposts ?? 0;
+    const engagement = Math.min(1, Math.log1p(likes + reposts * 2) / Math.log1p(10_000));
+    const ageDays = citation.postedAt ? Math.max(0, (now - Date.parse(citation.postedAt)) / 86_400_000) : 365;
+    const recency = ageDays <= 30 ? 1 : ageDays <= 90 ? 0.7 : ageDays <= 365 ? 0.35 : 0;
+    return engagement * 0.65 + recency * 0.35;
+  };
+  return citations
+    .map((citation, index) => ({ citation, index }))
+    .sort((left, right) => score(right.citation) - score(left.citation) || left.index - right.index)
+    .slice(0, limit)
+    .map(({ citation }) => citation);
+}
+
 function collectCitations(value: unknown, limit: number): Citation[] {
   const found: Citation[] = [];
   const seen = new Set<string>();
@@ -48,12 +88,18 @@ function collectCitations(value: unknown, limit: number): Citation[] {
         title: typeof record.title === "string" ? record.title : `X post by @${match?.[1] ?? "unknown"}`,
         handle: match?.[1] ? `@${match[1]}` : "@unknown",
         excerpt: typeof record.text === "string" ? record.text.slice(0, 280) : "",
+        postedAt: dateField(record),
+        engagement: {
+          likes: numberField(record, ["like_count", "likes", "favorite_count", "favourites"]),
+          reposts: numberField(record, ["retweet_count", "repost_count", "reposts", "shares"]),
+          comments: numberField(record, ["reply_count", "comment_count", "comments"]),
+        },
       });
     }
     Object.values(record).forEach(visit);
   }
   visit(value);
-  return found.slice(0, limit);
+  return rankCitations(found, limit);
 }
 
 export async function researchX(input: XSearchInput, runId: string, forceMock = false): Promise<XResearchResult> {
@@ -98,9 +144,10 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
   }
 
   traceEvents.emit(runId, "status", { state: "provider_call", provider: "xai", model: config.grokModel });
+  const candidateLimit = Math.max(input.maxPosts, Math.ceil(config.xSearchCandidates / 2));
   const response = await client.responses.create({
     model: config.grokModel,
-    input: [{ role: "user", content: buildXExtractionPrompt(input, input.maxPosts) }],
+    input: [{ role: "user", content: buildXExtractionPrompt(input, input.maxPosts, candidateLimit) }],
     tools: [tool] as never,
     max_output_tokens: config.grokMaxOutputTokens,
     store: false,

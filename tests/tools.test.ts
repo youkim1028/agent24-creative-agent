@@ -127,7 +127,8 @@ describe("DeckForge X tools", () => {
       allowedHandles: [],
     }, 6);
     expect(prompt).toContain("retrieval worker, not an analyst");
-    expect(prompt).toContain("at most 6 posts total");
+    expect(prompt).toContain("Retrieve up to 6 candidate posts total");
+    expect(prompt).toContain("Prioritize recent posts first");
     expect(prompt).toContain("Do not summarize");
   });
 

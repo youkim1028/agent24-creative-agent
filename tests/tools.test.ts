@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { unlink } from "node:fs/promises";
+import path from "node:path";
 import { availableToolDefinitions, executeTool, toolDefinitions } from "../src/agent/tools.js";
 import type { DeckSpec } from "../src/deck/schema.js";
 import { fatalIssues, validateDeck } from "../src/deck/validate.js";
@@ -151,5 +153,22 @@ describe("DeckForge X tools", () => {
     const result = JSON.parse(execution.output);
     expect(result.score).toBeGreaterThanOrEqual(70);
     expect(result.dimensions.visualIntent).toBe(100);
+  });
+
+  it("renders the exact validated and evaluated deck with the runtime module loader", async () => {
+    const context = { runId: "render-integration" };
+    await executeTool("validate_deck", JSON.stringify({ deck: validDeck() }), context);
+    await executeTool("evaluate_deck", JSON.stringify({}), context);
+    const execution = await executeTool("render_deck", JSON.stringify({}), context);
+    const result = JSON.parse(execution.output);
+
+    expect(result.ok).toBe(true);
+    expect(result.artifact.filename).toMatch(/\.pptx$/);
+    expect(result.artifact.jsonFilename).toMatch(/\.json$/);
+
+    await Promise.all([
+      unlink(path.resolve("artifacts", result.artifact.filename)),
+      unlink(path.resolve("artifacts", result.artifact.jsonFilename)),
+    ]);
   });
 });

@@ -3,12 +3,11 @@ import path from "node:path";
 import PptxGenModule from "pptxgenjs";
 import type { DeckArtifact, DeckSpec, SlideSpec } from "./schema.js";
 
-// PptxGenJS 4 ships a namespace-style declaration that TypeScript's NodeNext
-// resolver does not expose as constructable, although the ESM default export is
-// the constructor at runtime. Keep the interop cast isolated here.
+// PptxGenJS can arrive as either the constructor or a default-wrapped constructor,
+// depending on whether Node or tsx loads the package. Keep the interop isolated.
 type PptxPresentation = any;
 type PptxSlide = any;
-const PptxGenJS = PptxGenModule as unknown as new () => PptxPresentation;
+const PptxGenJS = ((PptxGenModule as any).default ?? PptxGenModule) as new () => PptxPresentation;
 
 type ThemeColors = {
   ink: string;

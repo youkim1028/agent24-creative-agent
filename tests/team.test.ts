@@ -58,8 +58,8 @@ describe("team architecture contracts", () => {
   });
 
   it("routes team roles to fast, quality, and critic model tiers", () => {
-    expect(modelForTeamAgent("research_planner")).toBe("gpt-5-mini");
-    expect(modelForTeamAgent("deck_composer")).toBe("gpt-5.6-sol");
-    expect(modelForTeamAgent("independent_critic")).toBe("gpt-5-mini");
+    expect(modelForTeamAgent("research_planner")).toBe("gpt-5.6-luna");
+    expect(modelForTeamAgent("deck_composer")).toBe("gpt-5.6-terra");
+    expect(modelForTeamAgent("independent_critic")).toBe("gpt-5.6-luna");
   });
 });

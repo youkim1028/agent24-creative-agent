@@ -4,7 +4,7 @@ import { z } from "zod";
 const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().default("gpt-5.6-sol"),
-  OPENAI_FAST_MODEL: z.string().default("gpt-5-mini"),
+  OPENAI_FAST_MODEL: z.string().default("gpt-5.6-luna"),
   OPENAI_QUALITY_MODEL: z.string().optional(),
   OPENAI_CRITIC_MODEL: z.string().optional(),
   OPENAI_REASONING_EFFORT: z

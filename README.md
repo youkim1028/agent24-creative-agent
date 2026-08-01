@@ -23,9 +23,9 @@ npm run dev
 ```dotenv
 OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-5.6-sol
-OPENAI_FAST_MODEL=gpt-5-mini
-OPENAI_QUALITY_MODEL=gpt-5.6-sol
-OPENAI_CRITIC_MODEL=gpt-5-mini
+OPENAI_FAST_MODEL=gpt-5.6-luna
+OPENAI_QUALITY_MODEL=gpt-5.6-terra
+OPENAI_CRITIC_MODEL=gpt-5.6-luna
 OPENAI_REASONING_EFFORT=medium
 XAI_API_KEY=...
 GROK_MODEL=grok-4.5
@@ -33,6 +33,10 @@ GROK_MODEL=grok-4.5
 
 팀 모드에서는 planner/evidence를 `OPENAI_FAST_MODEL`, narrative/art/composer/repair를
 `OPENAI_QUALITY_MODEL`, independent critic을 `OPENAI_CRITIC_MODEL`로 실행합니다.
+
+검색 메모리를 쓰려면 GCS API 키를 넣는 대신 Google Cloud Storage 버킷과 프로젝트 ID를
+설정하고, 로컬에서는 `gcloud auth application-default login`으로 인증합니다.
+`.env`의 `GCS_MEMORY_ENABLED=true`, `GCS_BUCKET`, `GCS_PROJECT_ID`를 채우면 됩니다.
 
 키는 각 공급자 콘솔에서 발급하며 GitHub 계정·GitHub Billing과 별개입니다. API 사용은 공급자별
 결제/크레딧이 필요할 수 있습니다. `.env`는 Git에서 제외되어 있으므로 키를 코드, 화면, 영상,

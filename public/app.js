@@ -4,6 +4,7 @@ const result = document.querySelector("#result");
 const runButton = document.querySelector("#run-button");
 const openaiBadge = document.querySelector("#openai-badge");
 const xaiBadge = document.querySelector("#xai-badge");
+const redditBadge = document.querySelector("#reddit-badge");
 const characterCount = document.querySelector("#character-count");
 const exampleButton = document.querySelector("#example-button");
 const copyButton = document.querySelector("#copy-button");
@@ -25,11 +26,15 @@ async function loadHealth() {
     const health = await response.json();
     setProviderBadge(openaiBadge, health.openai, health.openai.model);
     setProviderBadge(xaiBadge, health.xai, health.xai.model);
+    redditBadge.textContent = `REDDIT · ${health.reddit.mode.toUpperCase()}`;
+    redditBadge.classList.toggle("warning", health.reddit.mode === "disabled");
   } catch {
     openaiBadge.textContent = "서버 연결 실패";
     openaiBadge.classList.add("error");
     xaiBadge.textContent = "서버 연결 실패";
     xaiBadge.classList.add("error");
+    redditBadge.textContent = "서버 연결 실패";
+    redditBadge.classList.add("error");
   }
 }
 
@@ -41,10 +46,26 @@ function addText(parent, tag, className, text) {
   return node;
 }
 
-function renderDeck(deck) {
+function renderDeck(deck, evaluation = null) {
   result.replaceChildren();
   result.className = "result deck-result";
   addText(result, "p", "deck-thesis", deck.thesis);
+  if (deck.aestheticIntent) {
+    const intent = document.createElement("div");
+    intent.className = "aesthetic-summary";
+    addText(intent, "span", "aesthetic-theme", deck.aestheticIntent.theme.replaceAll("_", " "));
+    addText(intent, "span", "aesthetic-mood", deck.aestheticIntent.mood);
+    addText(intent, "p", "aesthetic-rationale", deck.aestheticIntent.rationale);
+    result.append(intent);
+  }
+  if (evaluation) {
+    const review = document.createElement("div");
+    review.className = "evaluation-summary";
+    addText(review, "span", "evaluation-score", `QUALITY ${evaluation.score}`);
+    addText(review, "span", "evaluation-status", evaluation.ready ? "READY TO REVIEW" : "NEEDS REVISION");
+    if (evaluation.issues.length) addText(review, "p", "evaluation-issues", evaluation.issues.map((issue) => issue.message).join(" · "));
+    result.append(review);
+  }
   const grid = document.createElement("div");
   grid.className = "slide-grid";
 
@@ -104,10 +125,21 @@ form.addEventListener("submit", async (event) => {
     .split(",")
     .map((value) => value.trim().replace(/^@/, ""))
     .filter(Boolean);
+  const targetMarkets = document.querySelector("#target-markets").value
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .slice(0, 3);
   const body = {
     brief,
     slideCount: Number(document.querySelector("#slide-count").value),
     language: document.querySelector("#language").value,
+    purpose: document.querySelector("#purpose").value.trim(),
+    audience: document.querySelector("#audience").value.trim(),
+    presentationContext: document.querySelector("#presentation-context").value.trim(),
+    userVoice: document.querySelector("#user-voice").value.trim(),
+    visualPreference: document.querySelector("#visual-preference").value.trim(),
+    targetMarkets,
     fromDate: document.querySelector("#from-date").value || null,
     toDate: document.querySelector("#to-date").value || null,
     allowedHandles: handles,
@@ -132,11 +164,14 @@ form.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(data.error || "실행에 실패했습니다.");
 
     latestOutput = data.output;
-    if (data.deck) renderDeck(data.deck);
+    if (data.deck) renderDeck(data.deck, data.evaluation);
     else result.textContent = data.output;
     copyButton.disabled = false;
     runMeta.hidden = false;
-    runMeta.textContent = `${data.mode.toUpperCase()} ${data.model} · ${data.xMode.toUpperCase()} ${data.grokModel} · ${data.rounds} rounds · run ${data.runId.slice(0, 8)}`;
+    const score = data.evaluation ? ` · quality ${data.evaluation.score}` : "";
+    const tokens = data.usage ? ` · ${data.usage.combinedTotalTokens.toLocaleString()} / ${data.usage.budgetTokens.toLocaleString()} tokens` : "";
+    const architecture = data.architecture ? ` · ${data.architecture.toUpperCase()} architecture` : "";
+    runMeta.textContent = `${data.mode.toUpperCase()} ${data.model}${architecture} · ${data.xMode.toUpperCase()} ${data.grokModel} · ${data.rounds} rounds${score}${tokens} · run ${data.runId.slice(0, 8)}`;
     if (data.artifact) {
       pptxDownload.href = data.artifact.downloadUrl;
       pptxDownload.download = data.artifact.filename;
@@ -155,4 +190,3 @@ form.addEventListener("submit", async (event) => {
 });
 
 void loadHealth();
-

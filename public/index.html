@@ -16,6 +16,7 @@
         <div class="top-actions">
           <span id="openai-badge" class="badge">GPT 확인 중</span>
           <span id="xai-badge" class="badge">Grok 확인 중</span>
+          <span id="reddit-badge" class="badge">Reddit 확인 중</span>
           <a class="button secondary" href="/trace.html" target="_blank">원본 이벤트 화면 ↗</a>
         </div>
       </header>
@@ -24,8 +25,8 @@
         <p class="eyebrow">LIVE X SIGNALS → EVIDENCE → 5-SLIDE DECK</p>
         <h1>X의 지금을<br /><span>발표 가능한 논지</span>로.</h1>
         <p class="lede">
-          Grok이 X에서 실시간 신호와 출처를 찾고, GPT가 논지를 설계합니다.
-          결정론적 검증기가 근거 누락과 과밀도를 차단한 뒤 PPTX를 렌더링합니다.
+          Grok과 Reddit Scout가 주제 불만과 AI PPT 디자인 비판을 수집하고, 역할이 분리된 GPT 팀이
+          논지·미학·비평을 협업합니다. 결정론적 검증을 통과한 동일 DeckSpec만 PPTX로 렌더링합니다.
         </p>
       </section>
 
@@ -48,6 +49,24 @@
               placeholder="예: 생성형 AI 영상 도구에 대한 한국 크리에이터들의 최근 반응을 조사하고, 서비스 기획팀이 다음 기능 우선순위를 결정할 수 있는 발표 자료를 만들어줘."
               required
             ></textarea>
+
+            <div class="context-grid">
+              <label>발표 목적
+                <input id="purpose" name="purpose" maxlength="240" placeholder="무엇을 결정하거나 설득해야 하나요?" />
+              </label>
+              <label>청중
+                <input id="audience" name="audience" maxlength="160" placeholder="예: 임원, 투자자, 고객" />
+              </label>
+              <label>발표 상황
+                <input id="presentation-context" name="presentationContext" maxlength="240" placeholder="예: 10분 제품 리뷰" />
+              </label>
+              <label>사용자 말투
+                <input id="user-voice" name="userVoice" maxlength="240" placeholder="예: 직설적이고 따뜻하게" />
+              </label>
+              <label class="wide-field">시각적 선호
+                <input id="visual-preference" name="visualPreference" maxlength="240" placeholder="예: 차분한 편집 디자인, 장식적인 AI 이미지는 피하기" />
+              </label>
+            </div>
 
             <div class="option-grid">
               <label>슬라이드 상한
@@ -72,6 +91,9 @@
             </div>
             <label class="handle-field">특정 X 계정만 검색 <span>선택 · 쉼표로 구분</span>
               <input id="allowed-handles" name="allowedHandles" type="text" placeholder="openai, xai, runwayml" />
+            </label>
+            <label class="handle-field">검색 국가 <span>선택 · 비워두면 언어별 기본 국가, 최대 3개</span>
+              <input id="target-markets" name="targetMarkets" type="text" placeholder="한국어: South Korea, United States" />
             </label>
 
             <div class="form-footer">
@@ -106,16 +128,17 @@
       </section>
 
       <section class="pipeline" aria-label="Agent pipeline">
-        <div><strong>01</strong><span>Grok X Search</span></div>
+        <div><strong>01</strong><span>Research plan</span></div>
         <i>→</i>
-        <div><strong>02</strong><span>GPT argument</span></div>
+        <div><strong>02</strong><span>X + Reddit evidence</span></div>
         <i>→</i>
-        <div><strong>03</strong><span>Code validation</span></div>
+        <div><strong>03</strong><span>Narrative + Art</span></div>
         <i>→</i>
-        <div><strong>04</strong><span>PPTX render</span></div>
+        <div><strong>04</strong><span>Independent critique</span></div>
+        <i>→</i>
+        <div><strong>05</strong><span>PPTX render</span></div>
       </section>
     </main>
     <script type="module" src="/app.js"></script>
   </body>
 </html>
-

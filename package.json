@@ -17,6 +17,7 @@
     "preflight": "node scripts/preflight.mjs"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.21.0",
     "dotenv": "latest",
     "express": "latest",
     "openai": "latest",
@@ -31,4 +32,3 @@
     "vitest": "latest"
   }
 }
-

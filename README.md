@@ -34,13 +34,16 @@ GROK_MODEL=grok-4.5
 
 ## 파이프라인
 
-1. `research_x` — Grok의 서버측 X Search가 현재 게시물과 URL을 수집합니다.
-2. `review_outline` — GPT가 만든 논지가 목차형 문구가 아닌지 검사합니다.
-3. `validate_deck` — 코드가 3~5장 구조, 근거, 밀도, 고유 ID를 검사합니다.
-4. `render_deck` — 바로 앞에서 통과한 동일 DeckSpec만 PPTX/JSON으로 저장합니다.
+1. Research Planner가 주제 불만과 AI PPT·디자인 비판을 별도 검색 레인으로 만듭니다.
+2. Grok X Scout와 Reddit Scout가 제한된 게시물 레코드만 수집합니다.
+3. Evidence Analyst → Narrative Architect → Art Director → Deck Composer가 strict JSON으로 인수인계합니다.
+4. Independent Critic과 코드 검증기가 실패 영역만 지적하고 한 번의 국소 수정을 허용합니다.
+5. 같은 실행에서 모든 게이트를 통과한 동일 DeckSpec만 PPTX/JSON으로 저장합니다.
 
-`/trace.html`에는 GPT `function_call`/`function_call_output`과 xAI 검색 이벤트 payload가
-그대로 표시됩니다. 키, 인증 헤더, 쿠키는 애초에 이벤트 객체에 넣지 않습니다.
+`AGENT_ARCHITECTURE=single`은 기존 tool-loop를 fallback으로 유지합니다.
+
+`/trace.html`에는 역할 전환, 토큰 사용량, 커뮤니티 검색 개수, fallback의 GPT 도구 호출과
+xAI 검색 이벤트가 표시됩니다. 키, 인증 헤더, 쿠키는 이벤트 객체에 넣지 않습니다.
 
 ## 명령어
 
@@ -64,4 +67,3 @@ GROK_MODEL=grok-4.5
 
 모델과 API 선택은 공식 문서를 기준으로 했습니다: [OpenAI 최신 모델과 Responses API](https://developers.openai.com/api/docs/guides/latest-model),
 [xAI X Search](https://docs.x.ai/developers/tools/x-search), [Grok 4.5](https://docs.x.ai/developers/grok-4-5).
-

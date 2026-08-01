@@ -12,9 +12,29 @@ export const statSchema = z.object({
   label: z.string().min(1).max(72),
 });
 
+export const aestheticIntentSchema = z.object({
+  theme: z.enum(["ink_acid", "editorial_light", "warm_documentary", "mono_evidence"]),
+  rationale: z.string().min(1).max(240),
+  mood: z.string().min(1).max(100),
+  layoutLogic: z.string().min(1).max(180),
+  imageLogic: z.string().min(1).max(180),
+  avoid: z.array(z.string().min(1).max(80)).max(6),
+});
+
+export const visualRoleSchema = z.enum([
+  "declaration",
+  "evidence",
+  "explanation",
+  "case",
+  "transition",
+  "synthesis",
+  "action",
+]);
+
 export const slideSchema = z.object({
   id: z.string().min(1).max(24),
   archetype: z.enum(["title", "claim", "stat", "two_col", "process", "bullets", "closing"]),
+  visualRole: visualRoleSchema,
   eyebrow: z.string().max(40),
   title: z.string().min(1).max(80),
   takeaway: z.string().max(160),
@@ -30,11 +50,13 @@ export const deckSchema = z.object({
   audience: z.string().min(1).max(120),
   thesis: z.string().min(1).max(180),
   language: z.enum(["ko", "en"]),
+  aestheticIntent: aestheticIntentSchema,
   slides: z.array(slideSchema).min(3).max(5),
 });
 
 export type Citation = z.infer<typeof citationSchema>;
 export type SlideSpec = z.infer<typeof slideSchema>;
+export type AestheticIntent = z.infer<typeof aestheticIntentSchema>;
 export type DeckSpec = z.infer<typeof deckSchema>;
 
 export interface DeckArtifact {
@@ -43,4 +65,3 @@ export interface DeckArtifact {
   downloadUrl: string;
   jsonUrl: string;
 }
-

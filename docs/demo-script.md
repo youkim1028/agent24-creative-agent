@@ -14,7 +14,7 @@
 
 1. 실제 키가 설정된 두 공급자 배지를 확인한다. `MOCK`이면 제출 영상 녹화를 중단한다.
 2. “한국 AI 영상 크리에이터의 최근 반응과 다음 기능 우선순위” 예시를 실행한다.
-3. 세컨드 화면에서 `research_x` → `review_outline` → `validate_deck` → `render_deck`을 짚는다.
+3. 세컨드 화면에서 `research_x` → `review_outline` → `validate_deck` → `evaluate_deck` → `render_deck`을 짚는다.
 4. 결과 화면의 출처와 PPTX 다운로드를 보여준다.
 
 ## 1:25–1:48 · 즉석 변화
@@ -29,4 +29,3 @@
 
 녹화 전 개인 알림과 계정 정보를 숨기고, 실제 모드 배지·PPTX 열림·원본 이벤트 가독성을 확인한다.
 1분 55초 안팎으로 편집하고 일부공개 링크를 다른 Google 계정에서 다시 연다.
-

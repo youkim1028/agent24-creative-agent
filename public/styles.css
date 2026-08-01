@@ -52,6 +52,11 @@ a { color: inherit; text-decoration: none; }
 .text-button:disabled { color: var(--muted); cursor: default; }
 textarea { width: 100%; min-height: 340px; resize: vertical; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 22px 0; outline: none; color: var(--ink); background: transparent; font-size: 18px; line-height: 1.65; }
 textarea:focus { border-color: var(--purple); }
+.context-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.context-grid label { display: grid; gap: 7px; color: var(--muted); font-size: 11px; font-family: var(--mono); }
+.context-grid input { width: 100%; border: 1px solid var(--line); border-radius: 0; padding: 10px; background: white; color: var(--ink); outline: none; }
+.context-grid input:focus { border-color: var(--purple); }
+.wide-field { grid-column: 1 / -1; }
 .option-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 12px; }
 .option-grid label, .handle-field { display: grid; gap: 7px; color: var(--muted); font-size: 11px; font-family: var(--mono); }
 .option-grid select, .option-grid input, .handle-field input { width: 100%; border: 1px solid var(--line); border-radius: 0; padding: 10px; background: white; color: var(--ink); outline: none; }
@@ -70,6 +75,12 @@ textarea:focus { border-color: var(--purple); }
 .deck-workspace textarea { min-height: 220px; }
 .deck-result { min-height: 475px; padding: 18px; }
 .deck-thesis { margin: 0 0 14px; padding: 12px 14px; border-left: 3px solid var(--purple); background: #f2f0ff; font-weight: 700; line-height: 1.55; }
+.aesthetic-summary { display: grid; grid-template-columns: auto auto 1fr; gap: 10px 14px; align-items: baseline; margin: 0 0 20px; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.aesthetic-theme, .aesthetic-mood { color: var(--purple); font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.aesthetic-rationale { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 13px; }
+.evaluation-summary { display: grid; grid-template-columns: auto auto 1fr; gap: 10px 14px; align-items: baseline; margin: 0 0 20px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.evaluation-score, .evaluation-status { color: var(--purple); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+.evaluation-issues { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 12px; }
 .slide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .slide-card { position: relative; min-height: 210px; padding: 18px; overflow: hidden; color: #f5f7f0; background: #121411; border-top: 3px solid var(--purple); }
 .slide-card.title, .slide-card.closing { border-top-color: var(--acid); }
@@ -124,6 +135,8 @@ textarea:focus { border-color: var(--purple); }
   .workspace-grid { grid-template-columns: 1fr; }
   .deck-workspace { grid-template-columns: 1fr; }
   .option-grid { grid-template-columns: 1fr 1fr; }
+  .context-grid { grid-template-columns: 1fr; }
+  .wide-field { grid-column: auto; }
   .slide-grid { grid-template-columns: 1fr; }
   .pipeline { grid-template-columns: 1fr 1fr; gap: 16px; }
   .pipeline i { display: none; }

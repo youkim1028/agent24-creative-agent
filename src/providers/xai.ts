@@ -1,10 +1,15 @@
 import OpenAI from "openai";
 import { config } from "../config.js";
 import { traceEvents } from "../events/event-bus.js";
+import { loadResearchMemory, saveResearchMemory } from "../memory/gcs-research.js";
+import type { ResearchMarket } from "../research/markets.js";
 import type { Citation } from "../deck/schema.js";
+import { buildXExtractionPrompt } from "./xai-prompt.js";
 
 export interface XSearchInput {
   query: string;
+  markets: ResearchMarket[];
+  maxPosts: number;
   fromDate: string | null;
   toDate: string | null;
   allowedHandles: string[];
@@ -15,12 +20,15 @@ export interface XResearchResult {
   mode: "xai" | "mock";
   model: string;
   query: string;
-  summary: string;
+  markets: ResearchMarket[];
+  extract: string;
   citations: Citation[];
+  usage: { inputTokens: number; outputTokens: number; totalTokens: number };
+  cache: "disabled" | "hit" | "miss";
   warning: string | null;
 }
 
-function collectCitations(value: unknown): Citation[] {
+function collectCitations(value: unknown, limit: number): Citation[] {
   const found: Citation[] = [];
   const seen = new Set<string>();
 
@@ -45,7 +53,7 @@ function collectCitations(value: unknown): Citation[] {
     Object.values(record).forEach(visit);
   }
   visit(value);
-  return found.slice(0, 12);
+  return found.slice(0, limit);
 }
 
 export async function researchX(input: XSearchInput, runId: string, forceMock = false): Promise<XResearchResult> {
@@ -55,10 +63,29 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
       mode: "mock",
       model: config.grokModel,
       query: input.query,
-      summary:
+      markets: input.markets,
+      extract:
         "[MOCK X RESEARCH] 초기 반응은 속도와 편의성에 긍정적이지만, 출처 신뢰성과 실제 업무 적용 가능성에 대한 검증 요구가 반복됩니다. 실제 X 근거를 사용하려면 XAI_API_KEY를 설정하세요.",
       citations: [{ url: "https://x.com/xai", title: "Mock X source — do not present as evidence", handle: "@xai", excerpt: "MOCK DATA" }],
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      cache: "disabled",
       warning: "XAI_API_KEY가 없어 모의 검색 결과를 사용했습니다.",
+    };
+  }
+
+  const cached = await loadResearchMemory(input);
+  if (cached.record) {
+    return {
+      ok: true,
+      mode: "xai",
+      model: config.grokModel,
+      query: input.query,
+      markets: cached.record.markets,
+      extract: cached.record.extract,
+      citations: cached.record.citations,
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      cache: "hit",
+      warning: cached.warning,
     };
   }
 
@@ -73,15 +100,10 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
   traceEvents.emit(runId, "status", { state: "provider_call", provider: "xai", model: config.grokModel });
   const response = await client.responses.create({
     model: config.grokModel,
-    input: [
-      {
-        role: "user",
-        content:
-          `Research this topic on X: ${input.query}\n\n` +
-          "Return a compact evidence memo. Separate recurring sentiment from verified fact, note disagreements, and cite specific X post URLs. Use at most eight strong sources.",
-      },
-    ],
+    input: [{ role: "user", content: buildXExtractionPrompt(input, input.maxPosts) }],
     tools: [tool] as never,
+    max_output_tokens: config.grokMaxOutputTokens,
+    store: false,
   });
 
   for (const item of response.output) {
@@ -89,14 +111,28 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
     traceEvents.emit(runId, type.includes("search") || type.includes("call") ? "tool_call" : "tool_result", item);
   }
 
-  const citations = collectCitations(response);
+  const citations = collectCitations(response, input.maxPosts);
+  const extract = response.output_text.slice(0, 6000);
+  const saveWarning = await saveResearchMemory(input, { extract, citations });
+  const usage = {
+    inputTokens: response.usage?.input_tokens ?? 0,
+    outputTokens: response.usage?.output_tokens ?? 0,
+    totalTokens: response.usage?.total_tokens ?? 0,
+  };
   return {
     ok: true,
     mode: "xai",
     model: config.grokModel,
     query: input.query,
-    summary: response.output_text,
+    markets: input.markets,
+    extract,
     citations,
-    warning: citations.length === 0 ? "Grok 응답에서 X URL 주석을 추출하지 못했습니다. 수치 주장을 사용하지 마세요." : null,
+    usage,
+    cache: config.gcsMemoryEnabled ? "miss" : "disabled",
+    warning: [
+      cached.warning,
+      citations.length === 0 ? "Grok 응답에서 X URL 주석을 추출하지 못했습니다. 수치 주장을 사용하지 마세요." : null,
+      saveWarning,
+    ].filter(Boolean).join(" ") || null,
   };
 }

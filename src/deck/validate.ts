@@ -64,8 +64,8 @@ export function validateDeck(input: unknown): { deck: DeckSpec | null; issues: D
     }
     for (const citation of slide.citations) {
       const host = new URL(citation.url).hostname.toLocaleLowerCase();
-      if (!host.endsWith("x.com") && !host.endsWith("twitter.com")) {
-        issues.push({ code: "NON_X_SOURCE", severity: "warning", slideId: slide.id, message: `X 검색 결과가 아닌 출처입니다: ${citation.url}` });
+      if (!host.endsWith("x.com") && !host.endsWith("twitter.com") && !host.endsWith("reddit.com")) {
+        issues.push({ code: "NON_COMMUNITY_SOURCE", severity: "warning", slideId: slide.id, message: `허용된 X/Reddit 커뮤니티 출처가 아닙니다: ${citation.url}` });
       }
     }
   }
@@ -76,4 +76,3 @@ export function validateDeck(input: unknown): { deck: DeckSpec | null; issues: D
 export function fatalIssues(issues: DeckIssue[]): DeckIssue[] {
   return issues.filter((issue) => issue.severity === "error");
 }
-

@@ -11,6 +11,12 @@ const requestSchema = z.object({
   brief: z.string().trim().min(3).max(8_000),
   slideCount: z.number().int().min(3).max(5).default(5),
   language: z.enum(["ko", "en"]).default("ko"),
+  purpose: z.string().trim().max(240).default("Create a clear, decision-ready presentation."),
+  audience: z.string().trim().max(160).default("General decision-makers"),
+  presentationContext: z.string().trim().max(240).default("Live presentation"),
+  userVoice: z.string().trim().max(240).default("Clear, direct, and grounded"),
+  visualPreference: z.string().trim().max(240).default("Use the topic's own visual language."),
+  targetMarkets: z.array(z.string().trim().min(1).max(60)).max(3).default([]),
   fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
   toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
   allowedHandles: z.array(z.string().min(1).max(80)).max(20).default([]),
@@ -26,6 +32,15 @@ app.get("/api/health", (_request, response) => {
     openai: { mode: config.mockOpenAI ? "mock" : "openai", model: config.model },
     xai: { mode: config.mockXai ? "mock" : "xai", model: config.grokModel },
     reasoningEffort: config.reasoningEffort,
+    architecture: config.agentArchitecture,
+    tokenLimits: {
+      openaiMaxOutputTokens: config.openaiMaxOutputTokens,
+      grokMaxOutputTokens: config.grokMaxOutputTokens,
+      runBudgetTokens: config.agentMaxTotalTokens,
+      xMaxPosts: config.xMaxPosts,
+    },
+    memory: { mode: config.gcsMemoryEnabled ? "gcs" : "disabled" },
+    reddit: { mode: config.redditEnabled ? "public-search" : "disabled", maxPosts: config.redditMaxPosts },
   });
 });
 

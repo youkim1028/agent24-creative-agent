@@ -7,6 +7,8 @@ const requiredFiles = [
   ".env.example",
   "src/agent/runner.ts",
   "src/agent/prompt.ts",
+  "src/providers/xai.ts",
+  "src/deck/render.ts",
   "public/trace.html",
   "docs/architecture.md",
   "docs/demo-script.md",
@@ -37,7 +39,7 @@ if (existsSync(".git")) {
     commits.length === 0 ? "no commits yet" : early.length ? `${early.length} early commit(s)` : `${commits.length} valid commit(s)`,
   );
 
-  const grep = spawnSync("git", ["grep", "-nE", "sk-[A-Za-z0-9_-]{20,}"], { encoding: "utf8" });
+  const grep = spawnSync("git", ["grep", "-nE", "(sk|xai)-[A-Za-z0-9_-]{20,}"], { encoding: "utf8" });
   add("no obvious API keys in tracked files", grep.status === 1, grep.stdout.trim() || "none found");
 } else {
   add("Git repository", false, "run git init after the official start time");
@@ -45,10 +47,13 @@ if (existsSync(".git")) {
 
 if (existsSync(".env")) {
   const text = readFileSync(".env", "utf8");
-  const hasKey = /^OPENAI_API_KEY=\S+/m.test(text);
-  add("runtime API key", hasKey, hasKey ? "configured locally" : "OPENAI_API_KEY is empty");
+  const hasOpenAIKey = /^OPENAI_API_KEY=\S+/m.test(text);
+  const hasXaiKey = /^XAI_API_KEY=\S+/m.test(text);
+  add("OpenAI runtime key", hasOpenAIKey, hasOpenAIKey ? "configured locally" : "OPENAI_API_KEY is empty; mock GPT is expected");
+  add("xAI runtime key", hasXaiKey, hasXaiKey ? "configured locally" : "XAI_API_KEY is empty; mock X research is expected");
 } else {
-  add("runtime API key", false, "copy .env.example to .env and add a key before the live demo");
+  add("OpenAI runtime key", false, "copy .env.example to .env before the live demo");
+  add("xAI runtime key", false, "copy .env.example to .env before the live demo");
 }
 
 for (const check of checks) {
@@ -56,7 +61,7 @@ for (const check of checks) {
 }
 
 const criticalFailures = checks.filter(
-  (check) => !check.ok && !["runtime API key", "Git repository", "commits after 2026-08-01 14:00 KST"].includes(check.name),
+  (check) => !check.ok && !["OpenAI runtime key", "xAI runtime key", "Git repository", "commits after 2026-08-01 14:00 KST"].includes(check.name),
 );
 if (criticalFailures.length) process.exitCode = 1;
 

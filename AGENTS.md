@@ -2,13 +2,16 @@
 
 ## Mission
 
-Build a reliable Creative-track agent whose decisions, tool ordering, prompt design,
-and recovery behavior are easy to demonstrate to judges.
+Build DeckForge X: a reliable Creative-track agent that turns live X conversations
+into short, grounded PPTX decks whose decisions and recovery behavior are easy to judge.
 
 ## Working agreement
 
 - Preserve the two-screen contract: user experience on `/`, raw tool events on `/trace.html`.
 - Use the OpenAI Responses API. Keep the model configurable through `OPENAI_MODEL`.
+- Use Grok only for X Search through xAI. Keep it configurable through `GROK_MODEL`.
+- Treat X posts as evidence of conversation, never automatic proof of factual claims.
+- Render only the exact DeckSpec that passed validation in the same run.
 - Never log or commit API keys, authorization headers, cookies, or personal data.
 - Add or update tests whenever tool behavior or routing changes.
 - Keep tool descriptions precise. Each tool must have one clear reason to exist.

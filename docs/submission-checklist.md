@@ -1,28 +1,29 @@
-# Submission Checklist
+# 제출 체크리스트
 
-## Before implementation freeze
+## 코드 동결 전
 
-- [ ] OpenAI API key configured only in `.env`
-- [ ] Main demo and raw trace screen work in separate windows
-- [ ] Five surprise inputs tested
-- [ ] `npm run typecheck && npm test && npm run build` passes
-- [ ] `npm run preflight` has no critical warning
-- [ ] GitHub commits are all after 2026-08-01 14:00 KST
+- [ ] `OPENAI_API_KEY`, `XAI_API_KEY`는 로컬 `.env`에만 있음
+- [ ] 메인 `/`와 원본 이벤트 `/trace.html`을 별도 화면에서 확인
+- [ ] 모의 모드와 실제 모드 배지가 정확함
+- [ ] 즉석 태스크 5개 이상 통과
+- [ ] `npm run typecheck`, `npm test`, `npm run build`, `npm run preflight` 실행
+- [ ] 모든 인정 대상 커밋이 2026-08-01 14:00 KST 이후임
+- [ ] GitHub 저장소에서 `.env`, 로그, 생성 산출물이 추적되지 않음
 
-## Deliverables
+## 제출물
 
-- [ ] Two-minute video uploaded as YouTube unlisted
-- [ ] Video tested from another account/device
-- [ ] Slide PDF has at most five pages
-- [ ] GitHub repository is accessible to judges
-- [ ] README contains setup and architecture information
-- [ ] Team leader has all three final links/files
+- [ ] 2분 영상은 YouTube 일부공개이며 다른 계정에서 재생됨
+- [ ] 영상에 API 키·알림·개인 계정 정보가 보이지 않음
+- [ ] PDF는 최대 5장이고 글자·출처가 읽힘
+- [ ] GitHub 링크와 커밋 히스토리를 팀장이 확인함
+- [ ] 팀원 전원이 DAKER용 Google 계정을 준비함
+- [ ] 인코딩·업로드를 고려해 07:00 전에 산출물 확정
 
-## Final-round equipment
+## 결선
 
-- [ ] Main screen and second trace screen tested
-- [ ] Power, charger, display adapter, and hotspot ready
-- [ ] Browser zoom and font size readable from the judging table
-- [ ] Backup API key/project budget available without exposing credentials
-- [ ] One team member operates; one narrates; one watches the trace/failure state
+- [ ] 2분 슬라이드 + 3분 라이브 데모 + 2분 즉석 태스크 리허설
+- [ ] `tool_call`/`tool_result` 원본 이벤트를 세컨드 화면에 실시간 표시
+- [ ] 충전기·디스플레이 어댑터·핫스팟 준비
+- [ ] 운영자, 발표자, trace/실패 감시 역할 분담
+- [ ] 공급자 장애 시 말할 한계와 복구 절차 준비
 

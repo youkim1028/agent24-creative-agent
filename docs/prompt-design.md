@@ -1,26 +1,15 @@
-# Prompt Design Notes
+# Prompt Design
 
-The system prompt lives in `src/agent/prompt.ts` so judges can inspect it directly.
+실제 지시는 `src/agent/prompt.ts`에서 심사위원이 바로 확인할 수 있다.
 
-## Intent
+- 역할 분리: GPT는 판단·글쓰기, Grok은 `research_x` 안의 X 검색만 담당한다.
+- 도구 순서: 검색 → 논지 검토 → 전체 DeckSpec → 검증 → 렌더링을 명시한다.
+- 근거 경계: 검색 결과에 없던 URL·핸들·인용·날짜·참여 수치를 만들지 않는다.
+- 사실 경계: X 게시물은 “사람들이 무엇을 말하는가”에만 근거가 된다.
+- 복구: 치명 오류는 보고된 부분만 고쳐 최대 두 번 재검증한다.
+- 종료: 렌더 성공 뒤 링크와 중요한 한계 하나만 말하고 멈춘다.
+- 모의 모드: 모든 자료에 리허설임을 표시하고 실제 증거처럼 표현하지 않는다.
 
-- State the outcome and operating boundaries once.
-- Describe when each tool is useful rather than forcing calls mechanically.
-- Define recovery behavior and a concrete stopping rule.
-- Separate the final-answer contract from internal tool orchestration.
-
-## Edge cases covered
-
-- Ambiguous briefs: identify material assumptions.
-- Missing facts: do not fabricate them.
-- Tool failure: report it and use a safe alternative.
-- Low-quality draft: revise once and optionally review again.
-- Runaway behavior: stop after two reviews; server also caps rounds at six.
-- Side effects: save only when requested or clearly required.
-
-## What to customize after choosing the final product
-
-Replace the generic tools with domain tools that create measurable user value. Keep one tool per
-decision boundary, update its description and schema, add representative tests, and document why
-its position in the pipeline is necessary.
+코드도 프롬프트를 신뢰하지 않는다. Zod 스키마가 인자를 제한하고, 검증기가 수치 근거·슬라이드
+순서·밀도를 검사하며, 실행 컨텍스트가 마지막으로 통과한 DeckSpec의 동일성을 확인한다.
 

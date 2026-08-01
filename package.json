@@ -1,9 +1,9 @@
 {
-  "name": "agent24-creative-agent",
+  "name": "deckforge-x",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Hackathon-ready creative agent with inspectable tool-call traces.",
+  "description": "GPT and Grok agent that turns live X signals into validated PPTX decks.",
   "engines": {
     "node": ">=20"
   },
@@ -20,6 +20,7 @@
     "dotenv": "latest",
     "express": "latest",
     "openai": "latest",
+    "pptxgenjs": "latest",
     "zod": "latest"
   },
   "devDependencies": {

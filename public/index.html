@@ -3,54 +3,81 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agent24 — Creative Agent</title>
+    <title>DeckForge X — Live signals to decision deck</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="shell">
       <header class="topbar">
         <a class="brand" href="/">
-          <span class="brand-mark">A24</span>
-          <span>Creative Agent</span>
+          <span class="brand-mark">DF/X</span>
+          <span>DeckForge X</span>
         </a>
         <div class="top-actions">
-          <span id="runtime-badge" class="badge">연결 확인 중</span>
+          <span id="openai-badge" class="badge">GPT 확인 중</span>
+          <span id="xai-badge" class="badge">Grok 확인 중</span>
           <a class="button secondary" href="/trace.html" target="_blank">원본 이벤트 화면 ↗</a>
         </div>
       </header>
 
-      <section class="hero">
-        <p class="eyebrow">BRIEF → DECISIONS → DELIVERABLE</p>
-        <h1>모호한 요청을<br /><span>검증 가능한 결과물</span>로.</h1>
+      <section class="hero deck-hero">
+        <p class="eyebrow">LIVE X SIGNALS → EVIDENCE → 5-SLIDE DECK</p>
+        <h1>X의 지금을<br /><span>발표 가능한 논지</span>로.</h1>
         <p class="lede">
-          에이전트가 요구사항을 구조화하고, 초안을 검토하고, 필요한 경우 결과물을 저장합니다.
-          모든 도구 호출과 결과는 세컨드 화면에 원본 JSON으로 표시됩니다.
+          Grok이 X에서 실시간 신호와 출처를 찾고, GPT가 논지를 설계합니다.
+          결정론적 검증기가 근거 누락과 과밀도를 차단한 뒤 PPTX를 렌더링합니다.
         </p>
       </section>
 
-      <section class="workspace-grid">
+      <section class="workspace-grid deck-workspace">
         <article class="panel input-panel">
           <div class="panel-heading">
             <div>
-              <p class="step-label">01 / BRIEF</p>
-              <h2>무엇을 만들어야 하나요?</h2>
+              <p class="step-label">01 / RESEARCH BRIEF</p>
+              <h2>어떤 X 대화를 덱으로 만들까요?</h2>
             </div>
             <button id="example-button" class="text-button" type="button">예시 입력</button>
           </div>
           <form id="brief-form">
-            <label class="sr-only" for="brief">창작 요청</label>
+            <label class="sr-only" for="brief">리서치 요청</label>
             <textarea
               id="brief"
               name="brief"
-              rows="11"
+              rows="8"
               maxlength="8000"
-              placeholder="대상, 목적, 결과물 형식, 반드시 지켜야 할 제약을 적어주세요. 예상 밖의 조건을 넣어도 됩니다."
+              placeholder="예: 생성형 AI 영상 도구에 대한 한국 크리에이터들의 최근 반응을 조사하고, 서비스 기획팀이 다음 기능 우선순위를 결정할 수 있는 발표 자료를 만들어줘."
               required
             ></textarea>
+
+            <div class="option-grid">
+              <label>슬라이드 상한
+                <select id="slide-count" name="slideCount">
+                  <option value="5" selected>5장</option>
+                  <option value="4">4장</option>
+                  <option value="3">3장</option>
+                </select>
+              </label>
+              <label>언어
+                <select id="language" name="language">
+                  <option value="ko" selected>한국어</option>
+                  <option value="en">English</option>
+                </select>
+              </label>
+              <label>검색 시작일
+                <input id="from-date" name="fromDate" type="date" />
+              </label>
+              <label>검색 종료일
+                <input id="to-date" name="toDate" type="date" />
+              </label>
+            </div>
+            <label class="handle-field">특정 X 계정만 검색 <span>선택 · 쉼표로 구분</span>
+              <input id="allowed-handles" name="allowedHandles" type="text" placeholder="openai, xai, runwayml" />
+            </label>
+
             <div class="form-footer">
               <span id="character-count">0 / 8,000</span>
               <button id="run-button" class="button primary" type="submit">
-                <span>에이전트 실행</span><span aria-hidden="true">→</span>
+                <span>덱 생성</span><span aria-hidden="true">→</span>
               </button>
             </div>
           </form>
@@ -59,29 +86,33 @@
         <article class="panel output-panel">
           <div class="panel-heading">
             <div>
-              <p class="step-label">02 / RESULT</p>
-              <h2>완성된 결과</h2>
+              <p class="step-label">02 / DECISION DECK</p>
+              <h2>검증된 슬라이드</h2>
             </div>
-            <button id="copy-button" class="text-button" type="button" disabled>복사</button>
+            <button id="copy-button" class="text-button" type="button" disabled>요약 복사</button>
           </div>
-          <div id="result" class="result empty" aria-live="polite">
+          <div id="result" class="result deck-result empty" aria-live="polite">
             <div class="empty-state">
               <span class="empty-glyph">✦</span>
-              <p>실행 결과가 여기에 나타납니다.</p>
+              <p>완성된 덱과 출처가 여기에 나타납니다.</p>
             </div>
+          </div>
+          <div id="artifact-actions" class="artifact-actions" hidden>
+            <a id="pptx-download" class="button primary" href="#">PPTX 다운로드</a>
+            <a id="json-download" class="button secondary" href="#">DeckSpec JSON</a>
           </div>
           <div id="run-meta" class="run-meta" hidden></div>
         </article>
       </section>
 
       <section class="pipeline" aria-label="Agent pipeline">
-        <div><strong>01</strong><span>Brief analysis</span></div>
+        <div><strong>01</strong><span>Grok X Search</span></div>
         <i>→</i>
-        <div><strong>02</strong><span>Adaptive draft</span></div>
+        <div><strong>02</strong><span>GPT argument</span></div>
         <i>→</i>
-        <div><strong>03</strong><span>Quality review</span></div>
+        <div><strong>03</strong><span>Code validation</span></div>
         <i>→</i>
-        <div><strong>04</strong><span>Delivery</span></div>
+        <div><strong>04</strong><span>PPTX render</span></div>
       </section>
     </main>
     <script type="module" src="/app.js"></script>

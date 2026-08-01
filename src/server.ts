@@ -7,7 +7,14 @@ import { runAgent } from "./agent/runner.js";
 import { traceEvents } from "./events/event-bus.js";
 
 const app = express();
-const requestSchema = z.object({ brief: z.string().trim().min(3).max(8_000) });
+const requestSchema = z.object({
+  brief: z.string().trim().min(3).max(8_000),
+  slideCount: z.number().int().min(3).max(5).default(5),
+  language: z.enum(["ko", "en"]).default("ko"),
+  fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
+  toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
+  allowedHandles: z.array(z.string().min(1).max(80)).max(20).default([]),
+});
 
 app.disable("x-powered-by");
 app.use(express.json({ limit: "100kb" }));
@@ -16,8 +23,8 @@ app.use(express.static(path.resolve("public")));
 app.get("/api/health", (_request, response) => {
   response.json({
     ok: true,
-    mode: config.mockMode ? "mock" : "openai",
-    model: config.model,
+    openai: { mode: config.mockOpenAI ? "mock" : "openai", model: config.model },
+    xai: { mode: config.mockXai ? "mock" : "xai", model: config.grokModel },
     reasoningEffort: config.reasoningEffort,
   });
 });
@@ -31,13 +38,24 @@ app.post("/api/run", async (request, response) => {
 
   const runId = randomUUID();
   try {
-    const result = await runAgent(parsed.data.brief, runId);
+    const result = await runAgent(parsed.data, runId);
     response.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown agent failure";
     traceEvents.emit(runId, "error", { message });
     response.status(500).json({ error: message, runId });
   }
+});
+
+app.get("/api/artifacts/:filename", (request, response) => {
+  const filename = path.basename(request.params.filename);
+  if (!/\.(?:pptx|json)$/i.test(filename)) {
+    response.status(400).json({ error: "Unsupported artifact type." });
+    return;
+  }
+  response.sendFile(path.resolve("artifacts", filename), (error) => {
+    if (error && !response.headersSent) response.status(404).json({ error: "Artifact not found." });
+  });
 });
 
 app.get("/api/events", (request, response) => {
@@ -67,8 +85,9 @@ app.delete("/api/events", (_request, response) => {
 });
 
 app.listen(config.port, () => {
-  const mode = config.mockMode ? "MOCK (add OPENAI_API_KEY to .env)" : "OPENAI";
-  console.log(`Agent24 running at http://localhost:${config.port} [${mode}]`);
+  const openaiMode = config.mockOpenAI ? "MOCK GPT" : "OPENAI";
+  const xaiMode = config.mockXai ? "MOCK X" : "XAI";
+  console.log(`DeckForge X running at http://localhost:${config.port} [${openaiMode} / ${xaiMode}]`);
   console.log(`Raw event screen: http://localhost:${config.port}/trace.html`);
 });
 

@@ -29,18 +29,19 @@ export async function callStructuredAgent<T>(args: {
   schemaName: string;
   schema: z.ZodType<T>;
   maxOutputTokens: number;
+  model: string;
 }): Promise<StructuredAgentResult<T>> {
   const content = JSON.stringify(args.input);
   traceEvents.emit(args.runId, "tool_call", {
     type: "agent_call",
     agent: args.agent,
-    model: config.model,
+    model: args.model,
     input_chars: content.length,
     max_output_tokens: args.maxOutputTokens,
   });
 
   const response = await args.client.responses.create({
-    model: config.model,
+    model: args.model,
     instructions: args.instructions,
     input: [{ role: "user", content }],
     reasoning: { effort: config.reasoningEffort },

@@ -43,6 +43,24 @@ const ROLE_TOKEN_LIMITS = {
   repair: 2600,
 };
 
+export const TEAM_AGENT_MODEL_TIERS = {
+  research_planner: "fast",
+  evidence_analyst: "fast",
+  narrative_architect: "quality",
+  art_director: "quality",
+  deck_composer: "quality",
+  independent_critic: "critic",
+  independent_critic_recheck: "critic",
+  deck_repairer: "quality",
+} as const;
+
+export function modelForTeamAgent(agent: string): string {
+  const tier = TEAM_AGENT_MODEL_TIERS[agent as keyof typeof TEAM_AGENT_MODEL_TIERS] ?? "quality";
+  if (tier === "fast") return config.fastModel;
+  if (tier === "critic") return config.criticModel;
+  return config.qualityModel;
+}
+
 function addUsage(target: AgentCallUsage, value: AgentCallUsage): void {
   target.inputTokens += value.inputTokens;
   target.outputTokens += value.outputTokens;
@@ -155,7 +173,7 @@ export async function runTeamAgent(request: AgentRequest, runId: string): Promis
     if (openaiUsage.totalTokens + xaiUsage.totalTokens >= config.agentMaxTotalTokens) {
       throw new Error(`Team token budget reached before ${args.agent}. Review the trace before increasing AGENT_MAX_TOTAL_TOKENS.`);
     }
-    const result = await callStructuredAgent({ client, runId, ...args });
+    const result = await callStructuredAgent({ client, runId, model: modelForTeamAgent(args.agent), ...args });
     addUsage(openaiUsage, result.usage);
     agentCalls += 1;
     return result.data;
@@ -294,7 +312,7 @@ export async function runTeamAgent(request: AgentRequest, runId: string): Promis
     output: request.language === "ko"
       ? `팀 검증을 통과한 PPTX가 생성되었습니다: ${artifact.downloadUrl} 커뮤니티 게시물은 대화의 증거이며 사실의 자동 증명은 아닙니다.`
       : `The team-reviewed PPTX is ready: ${artifact.downloadUrl} Community posts evidence conversation, not automatic factual truth.`,
-    model: config.model,
+    model: config.qualityModel,
     grokModel: config.grokModel,
     mode: "openai",
     architecture: "team",

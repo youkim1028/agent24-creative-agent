@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseRedditSearch } from "../src/providers/reddit.js";
 import { critiqueReportSchema, researchPlanSchema } from "../src/team/contracts.js";
 import { ART_DIRECTOR_PROMPT, INDEPENDENT_CRITIC_PROMPT } from "../src/team/prompts.js";
+import { modelForTeamAgent } from "../src/team/team-runner.js";
 
 describe("team architecture contracts", () => {
   it("keeps research planning bounded to explicit markets", () => {
@@ -54,5 +55,11 @@ describe("team architecture contracts", () => {
     expect(posts[0]?.platform).toBe("reddit");
     expect(posts[0]?.community).toBe("r/powerpoint");
     expect(posts[0]?.engagement).toEqual({ score: 42, comments: 11 });
+  });
+
+  it("routes team roles to fast, quality, and critic model tiers", () => {
+    expect(modelForTeamAgent("research_planner")).toBe("gpt-5-mini");
+    expect(modelForTeamAgent("deck_composer")).toBe("gpt-5.6-sol");
+    expect(modelForTeamAgent("independent_critic")).toBe("gpt-5-mini");
   });
 });

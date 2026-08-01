@@ -29,7 +29,15 @@ app.use(express.static(path.resolve("public")));
 app.get("/api/health", (_request, response) => {
   response.json({
     ok: true,
-    openai: { mode: config.mockOpenAI ? "mock" : "openai", model: config.model },
+    openai: {
+      mode: config.mockOpenAI ? "mock" : "openai",
+      model: config.qualityModel,
+      teamModels: {
+        fast: config.fastModel,
+        quality: config.qualityModel,
+        critic: config.criticModel,
+      },
+    },
     xai: { mode: config.mockXai ? "mock" : "xai", model: config.grokModel },
     reasoningEffort: config.reasoningEffort,
     architecture: config.agentArchitecture,

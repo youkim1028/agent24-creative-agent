@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent24 — Raw Tool Events</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="trace-body">
+    <main class="trace-shell">
+      <header class="trace-header">
+        <div>
+          <p class="eyebrow">SECOND SCREEN / UNMODIFIED PAYLOADS</p>
+          <h1>tool_call / tool_result</h1>
+          <p>Responses API에 전달된 도구 호출과 결과 payload를 변형 없이 출력합니다.</p>
+        </div>
+        <div class="trace-controls">
+          <span id="stream-state" class="badge live"><i></i> 연결 중</span>
+          <button id="clear-events" class="button secondary" type="button">화면 지우기</button>
+          <button id="fullscreen" class="button secondary" type="button">전체 화면</button>
+        </div>
+      </header>
+      <div class="trace-legend">
+        <span><i class="dot call"></i>tool_call</span>
+        <span><i class="dot result"></i>tool_result</span>
+        <span><i class="dot status"></i>status</span>
+      </div>
+      <section id="event-list" class="event-list" aria-live="polite">
+        <div id="waiting" class="trace-waiting">에이전트 이벤트를 기다리는 중…</div>
+      </section>
+    </main>
+    <script type="module" src="/trace.js"></script>
+  </body>
+</html>
+

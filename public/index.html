@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent24 — Creative Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="/">
+          <span class="brand-mark">A24</span>
+          <span>Creative Agent</span>
+        </a>
+        <div class="top-actions">
+          <span id="runtime-badge" class="badge">연결 확인 중</span>
+          <a class="button secondary" href="/trace.html" target="_blank">원본 이벤트 화면 ↗</a>
+        </div>
+      </header>
+
+      <section class="hero">
+        <p class="eyebrow">BRIEF → DECISIONS → DELIVERABLE</p>
+        <h1>모호한 요청을<br /><span>검증 가능한 결과물</span>로.</h1>
+        <p class="lede">
+          에이전트가 요구사항을 구조화하고, 초안을 검토하고, 필요한 경우 결과물을 저장합니다.
+          모든 도구 호출과 결과는 세컨드 화면에 원본 JSON으로 표시됩니다.
+        </p>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel input-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="step-label">01 / BRIEF</p>
+              <h2>무엇을 만들어야 하나요?</h2>
+            </div>
+            <button id="example-button" class="text-button" type="button">예시 입력</button>
+          </div>
+          <form id="brief-form">
+            <label class="sr-only" for="brief">창작 요청</label>
+            <textarea
+              id="brief"
+              name="brief"
+              rows="11"
+              maxlength="8000"
+              placeholder="대상, 목적, 결과물 형식, 반드시 지켜야 할 제약을 적어주세요. 예상 밖의 조건을 넣어도 됩니다."
+              required
+            ></textarea>
+            <div class="form-footer">
+              <span id="character-count">0 / 8,000</span>
+              <button id="run-button" class="button primary" type="submit">
+                <span>에이전트 실행</span><span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </form>
+        </article>
+
+        <article class="panel output-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="step-label">02 / RESULT</p>
+              <h2>완성된 결과</h2>
+            </div>
+            <button id="copy-button" class="text-button" type="button" disabled>복사</button>
+          </div>
+          <div id="result" class="result empty" aria-live="polite">
+            <div class="empty-state">
+              <span class="empty-glyph">✦</span>
+              <p>실행 결과가 여기에 나타납니다.</p>
+            </div>
+          </div>
+          <div id="run-meta" class="run-meta" hidden></div>
+        </article>
+      </section>
+
+      <section class="pipeline" aria-label="Agent pipeline">
+        <div><strong>01</strong><span>Brief analysis</span></div>
+        <i>→</i>
+        <div><strong>02</strong><span>Adaptive draft</span></div>
+        <i>→</i>
+        <div><strong>03</strong><span>Quality review</span></div>
+        <i>→</i>
+        <div><strong>04</strong><span>Delivery</span></div>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
+

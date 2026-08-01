@@ -3,11 +3,15 @@ import { config } from "../config.js";
 import { traceEvents } from "../events/event-bus.js";
 import { loadResearchMemory, saveResearchMemory } from "../memory/gcs-research.js";
 import type { ResearchMarket } from "../research/markets.js";
-import type { Citation } from "../deck/schema.js";
+import { citationSchema, type Citation } from "../deck/schema.js";
 import { buildXExtractionPrompt } from "./xai-prompt.js";
+import type { ResearchLane } from "../memory/gcs-research.js";
 
 export interface XSearchInput {
+  lane: ResearchLane;
   query: string;
+  // Stable brief-derived cache key; the research memory prefers it over the query.
+  cacheSeed?: string;
   markets: ResearchMarket[];
   maxPosts: number;
   fromDate: string | null;
@@ -19,6 +23,7 @@ export interface XResearchResult {
   ok: boolean;
   mode: "xai" | "mock";
   model: string;
+  lane: ResearchLane;
   query: string;
   markets: ResearchMarket[];
   extract: string;
@@ -26,6 +31,11 @@ export interface XResearchResult {
   usage: { inputTokens: number; outputTokens: number; totalTokens: number };
   cache: "disabled" | "hit" | "miss";
   warning: string | null;
+}
+
+function emitXResult(runId: string, result: XResearchResult): XResearchResult {
+  traceEvents.emit(runId, "tool_result", { type: "x_research_result", ...result });
+  return result;
 }
 
 function numberField(record: Record<string, unknown>, names: string[]): number | null {
@@ -68,6 +78,58 @@ function rankCitations(citations: Citation[], limit: number): Citation[] {
     .map(({ citation }) => citation);
 }
 
+// Primary citation source: the JSON array the extraction prompt demands. The
+// annotation walk below stays as a fallback, but annotations carry no author,
+// date, or text, so anything built from them alone is a skeleton.
+export function parseXCitationJson(outputText: string, limit: number): Citation[] {
+  const trimmed = outputText.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  const start = trimmed.indexOf("[");
+  const end = trimmed.lastIndexOf("]");
+  if (start < 0 || end <= start) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed.slice(start, end + 1));
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  const seen = new Set<string>();
+  const citations: Citation[] = [];
+  for (const entry of parsed) {
+    if (!entry || typeof entry !== "object") continue;
+    const record = entry as Record<string, unknown>;
+    const url = typeof record.url === "string" ? record.url : "";
+    if (!/^https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^/]+\/status\/\d+/i.test(url) || seen.has(url)) continue;
+    const excerpt = typeof record.excerpt === "string" ? record.excerpt.replace(/\s+/g, " ").trim().slice(0, 280) : "";
+    if (!excerpt) continue;
+    const handleMatch = url.match(/(?:x|twitter)\.com\/([^/]+)\/status/i);
+    // x.com/i/status/... shortcuts hide the author; demand the direct author URL.
+    if (!handleMatch || handleMatch[1]!.toLowerCase() === "i") continue;
+    const rawHandle = typeof record.handle === "string" && record.handle.trim()
+      ? record.handle.trim()
+      : handleMatch?.[1] ?? "unknown";
+    const handle = (rawHandle.startsWith("@") ? rawHandle : `@${rawHandle}`).slice(0, 80);
+    const postedAtRaw = typeof record.postedAt === "string" ? record.postedAt : null;
+    const likes = typeof record.likes === "number" && record.likes >= 0 ? record.likes : null;
+    const reposts = typeof record.reposts === "number" && record.reposts >= 0 ? record.reposts : null;
+    const candidate = citationSchema.safeParse({
+      url,
+      title: `X post by ${handle}`.slice(0, 160),
+      handle,
+      excerpt,
+      country: typeof record.country === "string" ? record.country.slice(0, 60) : "",
+      language: typeof record.language === "string" ? record.language.slice(0, 12) : "",
+      postedAt: postedAtRaw && !Number.isNaN(Date.parse(postedAtRaw)) ? new Date(postedAtRaw).toISOString() : null,
+      engagement: { likes, reposts, score: null, comments: null },
+    });
+    if (candidate.success) {
+      seen.add(url);
+      citations.push(candidate.data);
+    }
+  }
+  return rankCitations(citations, limit);
+}
+
 function collectCitations(value: unknown, limit: number): Citation[] {
   const found: Citation[] = [];
   const seen = new Set<string>();
@@ -81,20 +143,26 @@ function collectCitations(value: unknown, limit: number): Citation[] {
     const record = node as Record<string, unknown>;
     const url = typeof record.url === "string" ? record.url : null;
     if (url && /^https?:\/\/(?:www\.)?(?:x|twitter)\.com\//i.test(url) && !seen.has(url)) {
-      seen.add(url);
       const match = url.match(/(?:x|twitter)\.com\/([^/]+)/i);
-      found.push({
+      const citation = citationSchema.safeParse({
         url,
-        title: typeof record.title === "string" ? record.title : `X post by @${match?.[1] ?? "unknown"}`,
-        handle: match?.[1] ? `@${match[1]}` : "@unknown",
+        title: (typeof record.title === "string" ? record.title : `X post by @${match?.[1] ?? "unknown"}`).slice(0, 160),
+        handle: (match?.[1] ? `@${match[1]}` : "@unknown").slice(0, 80),
         excerpt: typeof record.text === "string" ? record.text.slice(0, 280) : "",
+        country: typeof record.country === "string" ? record.country.slice(0, 60) : "",
+        language: typeof record.language === "string" ? record.language.slice(0, 12) : "",
         postedAt: dateField(record),
         engagement: {
           likes: numberField(record, ["like_count", "likes", "favorite_count", "favourites"]),
           reposts: numberField(record, ["retweet_count", "repost_count", "reposts", "shares"]),
+          score: null,
           comments: numberField(record, ["reply_count", "comment_count", "comments"]),
         },
       });
+      if (citation.success) {
+        seen.add(url);
+        found.push(citation.data);
+      }
     }
     Object.values(record).forEach(visit);
   }
@@ -103,11 +171,13 @@ function collectCitations(value: unknown, limit: number): Citation[] {
 }
 
 export async function researchX(input: XSearchInput, runId: string, forceMock = false): Promise<XResearchResult> {
+  traceEvents.emit(runId, "tool_call", { type: "x_research", input });
   if (config.mockXai || forceMock) {
-    return {
+    return emitXResult(runId, {
       ok: true,
       mode: "mock",
       model: config.grokModel,
+      lane: input.lane,
       query: input.query,
       markets: input.markets,
       extract:
@@ -116,15 +186,16 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
       cache: "disabled",
       warning: "XAI_API_KEY가 없어 모의 검색 결과를 사용했습니다.",
-    };
+    });
   }
 
   const cached = await loadResearchMemory(input);
   if (cached.record) {
-    return {
+    return emitXResult(runId, {
       ok: true,
       mode: "xai",
       model: config.grokModel,
+      lane: input.lane,
       query: input.query,
       markets: cached.record.markets,
       extract: cached.record.extract,
@@ -132,7 +203,7 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
       cache: "hit",
       warning: cached.warning,
-    };
+    });
   }
 
   const client = new OpenAI({ apiKey: config.xaiApiKey, baseURL: "https://api.x.ai/v1" });
@@ -158,7 +229,14 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
     traceEvents.emit(runId, type.includes("search") || type.includes("call") ? "tool_call" : "tool_result", item);
   }
 
-  const citations = collectCitations(response, input.maxPosts);
+  let citations = parseXCitationJson(response.output_text, input.maxPosts);
+  let fallbackWarning: string | null = null;
+  if (citations.length === 0) {
+    citations = collectCitations(response, input.maxPosts);
+    if (citations.length > 0) {
+      fallbackWarning = "Grok의 구조화 인용 JSON을 파싱하지 못해 주석 URL 폴백을 사용했습니다. 폴백 인용에는 본문·작성자 정보가 없을 수 있습니다.";
+    }
+  }
   const extract = response.output_text.slice(0, 6000);
   const saveWarning = await saveResearchMemory(input, { extract, citations });
   const usage = {
@@ -166,10 +244,11 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
     outputTokens: response.usage?.output_tokens ?? 0,
     totalTokens: response.usage?.total_tokens ?? 0,
   };
-  return {
+  return emitXResult(runId, {
     ok: true,
     mode: "xai",
     model: config.grokModel,
+    lane: input.lane,
     query: input.query,
     markets: input.markets,
     extract,
@@ -178,8 +257,9 @@ export async function researchX(input: XSearchInput, runId: string, forceMock = 
     cache: config.gcsMemoryEnabled ? "miss" : "disabled",
     warning: [
       cached.warning,
-      citations.length === 0 ? "Grok 응답에서 X URL 주석을 추출하지 못했습니다. 수치 주장을 사용하지 마세요." : null,
+      fallbackWarning,
+      citations.length === 0 ? "Grok 응답에서 X 인용을 추출하지 못했습니다. 수치 주장을 사용하지 마세요." : null,
       saveWarning,
     ].filter(Boolean).join(" ") || null,
-  };
+  });
 }

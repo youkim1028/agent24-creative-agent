@@ -10,4 +10,6 @@ Thumbs.db
 artifacts/*
 !artifacts/.gitkeep
 data/events.ndjson
+data/image-provider-quota.json
+data/youtube-provider-quota.json
 

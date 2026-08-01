@@ -6,8 +6,21 @@
     <meta name="description" content="실시간 커뮤니티 대화를 근거 있는 의사결정용 PPTX로 만드는 DeckForge X" />
     <title>DeckForge X</title>
     <link rel="stylesheet" href="/styles.css" />
+    <noscript><style>#splash { display: none; }</style></noscript>
   </head>
   <body class="app-body">
+    <div id="splash" class="splash" role="button" tabindex="-1" aria-label="DeckForge X 시작하기">
+      <canvas id="splash-canvas" aria-hidden="true"></canvas>
+      <div class="splash-vignette" aria-hidden="true"></div>
+      <div class="splash-stage">
+        <p class="splash-eyebrow">Grounded presentation workspace</p>
+        <h1 class="splash-title">DeckForge X</h1>
+        <p class="splash-tagline">대화를, 판단 가능한 덱으로.</p>
+        <button id="splash-start" class="splash-start" type="button">Press To Start</button>
+        <p class="splash-hint">클릭하거나 아무 키나 누르세요</p>
+      </div>
+    </div>
+
     <div class="app-layout">
       <aside class="sidebar">
         <a class="brand" href="/" aria-label="DeckForge X 홈">
@@ -23,11 +36,12 @@
         <div class="sidebar-section">
           <p class="sidebar-label">Agent team</p>
           <ol class="agent-list" aria-label="덱 생성 단계">
-            <li><span>01</span><div><strong>Research lead</strong><small>질문·국가·검색량 설계</small></div></li>
-            <li><span>02</span><div><strong>Community scouts</strong><small>X·Reddit 근거 수집</small></div></li>
-            <li><span>03</span><div><strong>Story &amp; art</strong><small>논지와 미학을 병렬 설계</small></div></li>
-            <li><span>04</span><div><strong>Independent critic</strong><small>AI스러움·근거·가독성 검증</small></div></li>
-            <li><span>05</span><div><strong>Renderer</strong><small>검증된 DeckSpec만 출력</small></div></li>
+            <li><span>01</span><div><strong>Research Planner</strong><small>질문·국가·검색량 설계</small></div></li>
+            <li><span>02</span><div><strong>Evidence Analyst</strong><small>X·YouTube·Hacker News 분석</small></div></li>
+            <li><span>03</span><div><strong>Narrative Architect</strong><small>슬라이드 논지와 순서 설계</small></div></li>
+            <li><span>04</span><div><strong>Art Director</strong><small>미학·레이아웃·이미지 의도</small></div></li>
+            <li><span>05</span><div><strong>Deck Composer</strong><small>계약 기반 DeckSpec 조립</small></div></li>
+            <li><span>06</span><div><strong>Independent Critic</strong><small>근거·가독성·상투성 검증</small></div></li>
           </ol>
         </div>
 
@@ -35,7 +49,10 @@
           <p class="sidebar-label">Connections</p>
           <div id="openai-badge" class="provider-row"><span>OpenAI</span><em>확인 중</em></div>
           <div id="xai-badge" class="provider-row"><span>Grok X Search</span><em>확인 중</em></div>
-          <div id="reddit-badge" class="provider-row"><span>Reddit</span><em>확인 중</em></div>
+          <div id="youtube-badge" class="provider-row"><span>YouTube Comments</span><em>확인 중</em></div>
+          <div id="hacker-news-badge" class="provider-row"><span>Hacker News</span><em>확인 중</em></div>
+          <div id="pexels-badge" class="provider-row"><span>Pexels</span><em>확인 중</em></div>
+          <div id="unsplash-badge" class="provider-row"><span>Unsplash</span><em>확인 중</em></div>
         </div>
       </aside>
 
@@ -55,7 +72,7 @@
 
         <section class="intro-copy" aria-labelledby="workspace-title">
           <h2 id="workspace-title">무엇을 조사하고 발표할까요?</h2>
-          <p>X와 Reddit의 실제 대화를 바탕으로 짧은 PPTX를 설계합니다. 게시물은 여론의 증거로 사용하며, 사실의 자동 증명으로 취급하지 않습니다.</p>
+          <p>X 게시물, 국가별로 발견한 YouTube 댓글, Hacker News 토론을 바탕으로 짧은 PPTX를 설계합니다. 지역 검색 맥락과 작성자 국가는 구분하며, 커뮤니티 반응을 사실의 자동 증명으로 취급하지 않습니다.</p>
         </section>
 
         <section class="composer-card">
@@ -82,17 +99,14 @@
               <summary>
                 <span>
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6" /></svg>
-                  발표 맥락과 검색 범위
+                  검색·자료 옵션
                 </span>
                 <small>선택 사항</small>
               </summary>
               <div class="settings-body">
                 <div class="field-grid context-fields">
-                  <label><span>발표 목적</span><input id="purpose" name="purpose" maxlength="240" placeholder="어떤 결정을 도울까요?" /></label>
-                  <label><span>청중</span><input id="audience" name="audience" maxlength="160" placeholder="예: 제품 담당 임원" /></label>
-                  <label><span>발표 상황</span><input id="presentation-context" name="presentationContext" maxlength="240" placeholder="예: 10분 제품 리뷰" /></label>
-                  <label><span>사용자 말투</span><input id="user-voice" name="userVoice" maxlength="240" placeholder="예: 직설적이고 차분하게" /></label>
-                  <label class="wide-field"><span>시각적 선호</span><input id="visual-preference" name="visualPreference" maxlength="240" placeholder="예: 편집 디자인, 장식적인 AI 이미지는 피하기" /></label>
+                  <label class="wide-field"><span>꼭 반영할 조건 <small>선택 · 나머지는 AI가 요청문에서 판단</small></span><input id="additional-context" name="additionalContext" maxlength="1000" placeholder="예: 대학생 심사위원 대상, 2분 발표, 차분한 편집 디자인" /></label>
+                  <p class="context-inference-note wide-field">발표 목적·청중·상황·말투·시각 방향은 Research Planner가 요청문과 이 조건을 함께 읽고 결정합니다.</p>
                 </div>
 
                 <div class="field-grid search-fields">
@@ -105,6 +119,12 @@
                 <div class="field-grid source-fields">
                   <label><span>특정 X 계정 <small>쉼표로 구분</small></span><input id="allowed-handles" name="allowedHandles" type="text" placeholder="openai, xai, runwayml" /></label>
                   <label><span>검색 국가 <small>비우면 언어별 기본 국가 · 최대 3개</small></span><input id="target-markets" name="targetMarkets" type="text" placeholder="South Korea, United States" /></label>
+                  <label class="wide-field"><span>수정할 PPTX 첨부 <small>기존 슬라이드 내용을 브리프로 불러와 재설계합니다</small></span><input id="pptx-upload" name="pptxUpload" type="file" accept=".pptx" /></label>
+                  <label class="wide-field"><span>사용자 이미지·보드 <small>JPEG·PNG·WebP, 최대 8개</small></span><input id="image-uploads" name="imageUploads" type="file" accept="image/jpeg,image/png,image/webp" multiple /></label>
+                  <label><span>보드 라벨</span><input id="board-label" name="boardLabel" type="text" maxlength="80" placeholder="예: 제품 무드보드" /></label>
+                  <label><span>공식 이미지 URL <small>쉼표로 구분·서버 허용목록 필요</small></span><input id="official-image-urls" name="officialImageUrls" type="text" placeholder="https://brand.example.com/image.jpg" /></label>
+                  <label class="wide-field"><span>디자인 레퍼런스 URL <small>Dribbble·공개 보드, 쉼표로 구분</small></span><input id="design-reference-urls" name="designReferenceUrls" type="text" placeholder="https://dribbble.com/shots/..." /></label>
+                  <p id="upload-status" class="upload-status wide-field" aria-live="polite"></p>
                 </div>
               </div>
             </details>
@@ -146,6 +166,7 @@
         </section>
       </main>
     </div>
+    <script type="module" src="/splash.js"></script>
     <script type="module" src="/app.js"></script>
   </body>
 </html>

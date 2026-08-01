@@ -1,6 +1,4 @@
 import { EventEmitter } from "node:events";
-import { appendFile, mkdir } from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
 
 export type TraceEventType = "tool_call" | "tool_result" | "status" | "error";
@@ -18,8 +16,6 @@ const EVENT_LIMIT = 250;
 class TraceEventBus {
   private readonly emitter = new EventEmitter();
   private history: TraceEvent[] = [];
-  private readonly logPath = path.resolve("data", "events.ndjson");
-  private persistenceQueue: Promise<void> = Promise.resolve();
 
   emit(runId: string, type: TraceEventType, payload: unknown): TraceEvent {
     const event: TraceEvent = {
@@ -33,8 +29,6 @@ class TraceEventBus {
     this.history.push(event);
     this.history = this.history.slice(-EVENT_LIMIT);
     this.emitter.emit("event", event);
-    // Serialize writes so the rehearsal log preserves the same order as the live SSE stream.
-    this.persistenceQueue = this.persistenceQueue.then(() => this.persist(event));
     return event;
   }
 
@@ -49,15 +43,6 @@ class TraceEventBus {
 
   clear(): void {
     this.history = [];
-  }
-
-  private async persist(event: TraceEvent): Promise<void> {
-    try {
-      await mkdir(path.dirname(this.logPath), { recursive: true });
-      await appendFile(this.logPath, `${JSON.stringify(event)}\n`, "utf8");
-    } catch (error) {
-      console.error("Failed to persist trace event", error);
-    }
   }
 }
 

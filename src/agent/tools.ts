@@ -7,6 +7,7 @@ import { renderDeck } from "../deck/render.js";
 import { researchX } from "../providers/xai.js";
 
 const researchSchema = z.object({
+  lane: z.enum(["topic", "design_critique"]),
   query: z.string().min(3).max(500),
   markets: z.array(z.object({
     country: z.string().min(1).max(60),
@@ -147,6 +148,7 @@ export async function executeTool(
       const input = researchSchema.parse(parsed);
       const result = await researchX(
         {
+          lane: input.lane,
           query: input.query,
           markets: input.markets.map((market) => ({ country: market.country, searchLanguage: market.search_language })),
           maxPosts: config.xMaxPosts,

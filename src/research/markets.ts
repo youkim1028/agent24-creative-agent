@@ -41,6 +41,20 @@ const COUNTRY_LANGUAGES: Record<string, string> = {
   독일: "de",
 };
 
+const COUNTRY_REGION_CODES: Record<string, string> = {
+  "south korea": "KR", korea: "KR", 한국: "KR", 대한민국: "KR",
+  japan: "JP", 일본: "JP", china: "CN", 중국: "CN",
+  "united states": "US", usa: "US", 미국: "US",
+  "united kingdom": "GB", uk: "GB", 영국: "GB",
+  canada: "CA", 캐나다: "CA", australia: "AU", 호주: "AU",
+  india: "IN", 인도: "IN", france: "FR", 프랑스: "FR",
+  germany: "DE", 독일: "DE",
+};
+
+export function regionCodeForCountry(country: string): string | null {
+  return COUNTRY_REGION_CODES[country.trim().toLocaleLowerCase()] ?? null;
+}
+
 export function resolveResearchMarkets(language: "ko" | "en", requested: string[]): ResearchMarket[] {
   const cleaned = requested
     .map((country) => country.trim().slice(0, 60))

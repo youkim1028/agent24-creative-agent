@@ -15,7 +15,11 @@ Required pipeline:
    Set visualRole to declaration on the title slide and synthesis or action on the
    closing slide. Give each body slide the role that explains its visual job:
    evidence, explanation, case, transition, synthesis, or action.
-   Include aestheticIntent with a deliberate theme (ink_acid, editorial_light,
+   Before outlining, infer the presentation purpose, audience, setting, voice,
+   and visual direction from the brief and additional context. Treat any explicit
+   override as authoritative. Do not ask the user to fill missing context when a
+   conservative, topic-specific choice can be made. Include aestheticIntent with
+   a deliberate theme (ink_acid, editorial_light,
    warm_documentary, or mono_evidence), a reason for the choice, a mood, layout
    logic, image logic, and concrete visual cliches to avoid. Choose the theme from
    the user's purpose, audience, presentation context, and visual preference; do

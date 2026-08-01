@@ -12,7 +12,11 @@
         <div>
           <p class="eyebrow">SECOND SCREEN / UNMODIFIED PAYLOADS</p>
           <h1>tool_call / tool_result</h1>
-          <p>GPT와 Grok이 전달한 도구 호출·결과 payload를 요약하거나 고치지 않고 출력합니다.</p>
+          <p>
+            GPT 역할 호출에 실제로 전달한 요청 객체와 모델이 돌려준 출력, Grok X Search의 output
+            item, YouTube 영상·댓글 및 Hacker News 검색 요청과 정규화 결과를 요약하거나 고치지 않고 그대로 출력합니다.
+            긴 payload는 잘라내지 않고 카드 안에서 스크롤됩니다.
+          </p>
         </div>
         <div class="trace-controls">
           <span id="stream-state" class="connection-badge live"><i></i><span>연결 중</span></span>

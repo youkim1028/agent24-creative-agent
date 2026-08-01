@@ -1,4 +1,4 @@
-import type { DeckSpec } from "./schema.js";
+import { visualSilhouetteKey, type DeckSpec } from "./schema.js";
 
 export interface DeckEvaluationIssue {
   code: string;
@@ -28,7 +28,8 @@ export function evaluateDeck(deck: DeckSpec): DeckEvaluation {
     "This is a deterministic structure review; visual taste and factual truth still require human judgment.",
   ];
   const bodySlides = deck.slides.slice(1, -1);
-  const roles = new Set(bodySlides.map((slide) => slide.visualRole));
+  const roles = new Set(bodySlides.map((slide) => slide.visualDirective.layout));
+  const families = new Set(deck.slides.map((slide) => slide.visualDirective.layoutFamily));
 
   let narrative = 100;
   let visualIntent = 100;
@@ -48,6 +49,17 @@ export function evaluateDeck(deck: DeckSpec): DeckEvaluation {
     rhythm -= 25;
     issues.push({ code: "ROLE_REPETITION", severity: "warning", slideId: null, message: "Body slides repeat one visual role; introduce a deliberate change in rhythm." });
   }
+  if (deck.slides.length === 5 && families.size < 5) {
+    rhythm -= 30;
+    issues.push({ code: "LAYOUT_FAMILY_REPETITION", severity: "error", slideId: null, message: "A five-slide deck must not reuse a layout family." });
+  }
+  deck.slides.forEach((slide, index) => {
+    if (index === 0) return;
+    if (visualSilhouetteKey(deck.slides[index - 1]!.visualDirective) === visualSilhouetteKey(slide.visualDirective)) {
+      rhythm -= 20;
+      issues.push({ code: "ADJACENT_SILHOUETTE_REPETITION", severity: "error", slideId: slide.id, message: "Adjacent slides repeat the same silhouette." });
+    }
+  });
   if (deck.aestheticIntent.rationale.length < 32) {
     visualIntent -= 15;
     issues.push({ code: "THIN_AESTHETIC_RATIONALE", severity: "warning", slideId: null, message: "Explain why this visual direction serves the audience and topic." });
@@ -62,10 +74,9 @@ export function evaluateDeck(deck: DeckSpec): DeckEvaluation {
       issues.push({ code: "GENERIC_TITLE", severity: "warning", slideId: slide.id, message: "Use a claim or decision in the title instead of a topic label." });
     }
   }
-  if (bodySlides.length > 0 && bodySlides.every((slide) => slide.citations.length === 0)) {
-    grounding -= 20;
-    issues.push({ code: "NO_BODY_SOURCES", severity: "warning", slideId: null, message: "No body slide cites a source; make the evidence boundary explicit." });
-  }
+  // Community research is an evaluation rubric, never deck content: slides are
+  // NOT required to cite community posts, and the team-runner separately blocks
+  // any deck that leaks post text, handles, or URLs into its copy.
 
   const score = Math.max(0, Math.round((narrative + visualIntent + rhythm + grounding) / 4));
   return {

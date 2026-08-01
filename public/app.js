@@ -16,8 +16,10 @@ const jsonDownload = document.querySelector("#json-download");
 let latestOutput = "";
 
 function setProviderBadge(element, provider, model) {
-  element.textContent = `${provider.mode.toUpperCase()} · ${model}`;
+  const status = element.querySelector("em");
+  status.textContent = provider.mode === "live" ? model : provider.mode.toUpperCase();
   element.classList.toggle("warning", provider.mode === "mock");
+  element.title = `${provider.mode.toUpperCase()} · ${model}`;
 }
 
 async function loadHealth() {
@@ -26,15 +28,13 @@ async function loadHealth() {
     const health = await response.json();
     setProviderBadge(openaiBadge, health.openai, health.openai.model);
     setProviderBadge(xaiBadge, health.xai, health.xai.model);
-    redditBadge.textContent = `REDDIT · ${health.reddit.mode.toUpperCase()}`;
+    redditBadge.querySelector("em").textContent = health.reddit.mode.toUpperCase();
     redditBadge.classList.toggle("warning", health.reddit.mode === "disabled");
   } catch {
-    openaiBadge.textContent = "서버 연결 실패";
-    openaiBadge.classList.add("error");
-    xaiBadge.textContent = "서버 연결 실패";
-    xaiBadge.classList.add("error");
-    redditBadge.textContent = "서버 연결 실패";
-    redditBadge.classList.add("error");
+    [openaiBadge, xaiBadge, redditBadge].forEach((badge) => {
+      badge.querySelector("em").textContent = "연결 실패";
+      badge.classList.add("error");
+    });
   }
 }
 
@@ -50,22 +50,26 @@ function renderDeck(deck, evaluation = null) {
   result.replaceChildren();
   result.className = "result deck-result";
   addText(result, "p", "deck-thesis", deck.thesis);
+
+  const summary = document.createElement("div");
+  summary.className = "deck-summary";
   if (deck.aestheticIntent) {
     const intent = document.createElement("div");
     intent.className = "aesthetic-summary";
     addText(intent, "span", "aesthetic-theme", deck.aestheticIntent.theme.replaceAll("_", " "));
     addText(intent, "span", "aesthetic-mood", deck.aestheticIntent.mood);
     addText(intent, "p", "aesthetic-rationale", deck.aestheticIntent.rationale);
-    result.append(intent);
+    summary.append(intent);
   }
   if (evaluation) {
     const review = document.createElement("div");
     review.className = "evaluation-summary";
     addText(review, "span", "evaluation-score", `QUALITY ${evaluation.score}`);
     addText(review, "span", "evaluation-status", evaluation.ready ? "READY TO REVIEW" : "NEEDS REVISION");
-    if (evaluation.issues.length) addText(review, "p", "evaluation-issues", evaluation.issues.map((issue) => issue.message).join(" · "));
-    result.append(review);
+    if (evaluation.issues?.length) addText(review, "p", "evaluation-issues", evaluation.issues.map((issue) => issue.message).join(" · "));
+    summary.append(review);
   }
+  if (summary.childElementCount) result.append(summary);
   const grid = document.createElement("div");
   grid.className = "slide-grid";
 
@@ -76,7 +80,7 @@ function renderDeck(deck, evaluation = null) {
     addText(card, "p", "slide-eyebrow", slide.eyebrow || slide.archetype);
     addText(card, "h3", "slide-title", slide.title);
     if (slide.takeaway) addText(card, "p", "slide-takeaway", slide.takeaway);
-    if (slide.stats.length) {
+    if (slide.stats?.length) {
       const stats = document.createElement("div");
       stats.className = "preview-stats";
       slide.stats.forEach((stat) => {
@@ -86,12 +90,12 @@ function renderDeck(deck, evaluation = null) {
         stats.append(item);
       });
       card.append(stats);
-    } else if (slide.bullets.length) {
+    } else if (slide.bullets?.length) {
       const list = document.createElement("ul");
       slide.bullets.forEach((bullet) => addText(list, "li", "", bullet));
       card.append(list);
     }
-    if (slide.citations.length) {
+    if (slide.citations?.length) {
       addText(card, "p", "slide-sources", slide.citations.map((citation) => citation.handle || citation.title).join(" · "));
     }
     grid.append(card);
@@ -111,9 +115,14 @@ exampleButton.addEventListener("click", () => {
 });
 
 copyButton.addEventListener("click", async () => {
-  await navigator.clipboard.writeText(latestOutput);
-  copyButton.textContent = "복사됨";
-  setTimeout(() => (copyButton.textContent = "요약 복사"), 1200);
+  try {
+    await navigator.clipboard.writeText(latestOutput);
+    const label = copyButton.querySelector("span");
+    label.textContent = "복사됨";
+    setTimeout(() => (label.textContent = "요약 복사"), 1200);
+  } catch {
+    copyButton.title = "브라우저에서 클립보드 권한을 허용해 주세요.";
+  }
 });
 
 form.addEventListener("submit", async (event) => {
@@ -147,9 +156,18 @@ form.addEventListener("submit", async (event) => {
 
   runButton.disabled = true;
   runButton.classList.add("loading");
-  runButton.querySelector("span:first-child").textContent = "X 검색·덱 생성 중";
+  runButton.querySelector("span:first-child").textContent = "생성 중";
   result.className = "result deck-result";
-  result.textContent = "Grok이 X 신호를 수집하고 GPT가 논지를 설계하고 있습니다…";
+  result.replaceChildren();
+  const loading = document.createElement("div");
+  loading.className = "loading-state";
+  const spinner = document.createElement("span");
+  spinner.className = "loading-spinner";
+  spinner.setAttribute("aria-hidden", "true");
+  const loadingText = document.createElement("span");
+  loadingText.textContent = "커뮤니티 근거를 수집하고 덱을 설계하고 있습니다…";
+  loading.append(spinner, loadingText);
+  result.append(loading);
   runMeta.hidden = true;
   artifactActions.hidden = true;
   copyButton.disabled = true;
@@ -163,7 +181,7 @@ form.addEventListener("submit", async (event) => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "실행에 실패했습니다.");
 
-    latestOutput = data.output;
+    latestOutput = data.output || data.deck?.thesis || "";
     if (data.deck) renderDeck(data.deck, data.evaluation);
     else result.textContent = data.output;
     copyButton.disabled = false;
@@ -181,7 +199,7 @@ form.addEventListener("submit", async (event) => {
     }
   } catch (error) {
     result.classList.add("error-result");
-    result.textContent = `오류: ${error.message}`;
+    result.textContent = `생성하지 못했습니다. ${error instanceof Error ? error.message : "잠시 후 다시 시도해 주세요."}`;
   } finally {
     runButton.disabled = false;
     runButton.classList.remove("loading");

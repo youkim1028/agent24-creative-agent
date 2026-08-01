@@ -7,17 +7,22 @@ const fullscreenButton = document.querySelector("#fullscreen");
 const source = new EventSource("/api/events");
 
 source.onopen = () => {
-  streamState.innerHTML = "<i></i> 실시간 연결";
+  streamState.querySelector("span").textContent = "실시간 연결";
   streamState.classList.add("live");
 };
 
 source.onerror = () => {
-  streamState.textContent = "재연결 중";
+  streamState.querySelector("span").textContent = "재연결 중";
   streamState.classList.remove("live");
 };
 
 source.onmessage = (message) => {
-  const event = JSON.parse(message.data);
+  let event;
+  try {
+    event = JSON.parse(message.data);
+  } catch {
+    return;
+  }
   waiting?.remove();
 
   const article = document.createElement("article");
@@ -38,7 +43,8 @@ source.onmessage = (message) => {
 };
 
 clearButton.addEventListener("click", async () => {
-  await fetch("/api/events", { method: "DELETE" });
+  const response = await fetch("/api/events", { method: "DELETE" });
+  if (!response.ok) return;
   list.replaceChildren();
   const message = document.createElement("div");
   message.className = "trace-waiting";

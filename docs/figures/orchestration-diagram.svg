@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 780" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#111"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#777"/>
+    </marker>
+  </defs>
+  <rect width="1180" height="780" fill="#ffffff"/>
+
+  <text x="70" y="44" font-size="17" fill="#111" font-weight="bold">DeckForge X — Orchestration</text>
+  <text x="70" y="63" font-size="10.5" fill="#777">a deterministic TypeScript core owns the control flow; models and APIs are called on contract</text>
+
+  <!-- ══ Input / Output ══ -->
+  <rect x="490" y="76" width="200" height="34" fill="#ffffff" stroke="#111" stroke-width="1.8"/>
+  <text x="590" y="98" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">User Brief</text>
+  <path d="M 590 110 L 590 128" fill="none" stroke="#111" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- ══ Orchestrator spine ══ -->
+  <rect x="460" y="132" width="260" height="524" fill="#fafaf8" stroke="#111" stroke-width="2"/>
+  <text x="590" y="154" text-anchor="middle" font-size="12.5" fill="#111" font-weight="bold">Deterministic Orchestrator</text>
+  <text x="590" y="169" text-anchor="middle" font-size="9" fill="#777">TypeScript · typed contracts · bounded retries</text>
+  <line x1="478" y1="178" x2="702" y2="178" stroke="#ddd" stroke-width="1"/>
+
+  <!-- steps -->
+  <g font-size="11" fill="#111">
+    <text x="482" y="200"><tspan font-weight="bold" fill="#999">01</tspan>  Plan research queries</text>
+    <text x="482" y="252"><tspan font-weight="bold" fill="#999">02</tspan>  Search community signals</text>
+    <text x="482" y="304"><tspan font-weight="bold" fill="#999">03</tspan>  Build AI-ness rubric</text>
+    <text x="482" y="356"><tspan font-weight="bold" fill="#999">04</tspan>  Design narrative</text>
+    <text x="482" y="408"><tspan font-weight="bold" fill="#999">05</tspan>  Direct visual system</text>
+    <text x="482" y="460"><tspan font-weight="bold" fill="#999">06</tspan>  Resolve visual assets</text>
+    <text x="482" y="512"><tspan font-weight="bold" fill="#999">07</tspan>  Compose copy · bind by code</text>
+    <text x="482" y="564"><tspan font-weight="bold" fill="#999">08</tspan>  Critique · repair ×1</text>
+    <text x="482" y="616"><tspan font-weight="bold" fill="#999">09</tspan>  Fail-closed gate → render</text>
+  </g>
+
+  <path d="M 590 656 L 590 676" fill="none" stroke="#111" stroke-width="1.2" marker-end="url(#arr)"/>
+  <rect x="480" y="680" width="220" height="36" fill="#ffffff" stroke="#111" stroke-width="1.8"/>
+  <text x="590" y="703" text-anchor="middle" font-size="12" fill="#111" font-weight="bold">PPTX + JSON artifacts</text>
+
+  <!-- ══ Left: model providers ══ -->
+  <text x="70" y="152" font-size="10" fill="#999" letter-spacing="2">MODEL PROVIDERS</text>
+
+  <!-- 01 OpenAI luna -->
+  <rect x="70" y="180" width="360" height="38" rx="4" fill="#ececec" stroke="#111" stroke-width="1.1"/>
+  <text x="86" y="196" font-size="10.5" fill="#111" font-weight="bold">OpenAI · gpt-5.6-luna</text>
+  <text x="86" y="210" font-size="9.5" fill="#555">Research Planner — query design, presentation profile</text>
+  <line x1="430" y1="196" x2="460" y2="196" stroke="#111" stroke-width="1.1"/>
+
+  <!-- 02 xAI -->
+  <rect x="70" y="232" width="360" height="38" rx="4" fill="#161616" stroke="#161616"/>
+  <text x="86" y="248" font-size="10.5" fill="#ffffff" font-weight="bold">xAI · Grok 4.5</text>
+  <text x="86" y="262" font-size="9.5" fill="#c9c9c9">X Live Search — keyword + semantic, citation-bound</text>
+  <line x1="430" y1="248" x2="460" y2="248" stroke="#111" stroke-width="1.1"/>
+
+  <!-- 03 OpenAI luna analyst -->
+  <rect x="70" y="284" width="360" height="38" rx="4" fill="#ececec" stroke="#111" stroke-width="1.1"/>
+  <text x="86" y="300" font-size="10.5" fill="#111" font-weight="bold">OpenAI · gpt-5.6-luna</text>
+  <text x="86" y="314" font-size="9.5" fill="#555">Evidence Analyst — complaints → pass/fail criteria</text>
+  <line x1="430" y1="300" x2="460" y2="300" stroke="#111" stroke-width="1.1"/>
+
+  <!-- 04 sol narrative -->
+  <rect x="70" y="336" width="360" height="38" rx="4" fill="#ececec" stroke="#111" stroke-width="1.1"/>
+  <text x="86" y="352" font-size="10.5" fill="#111" font-weight="bold">OpenAI · gpt-5.6-sol</text>
+  <text x="86" y="366" font-size="9.5" fill="#555">Narrative Architect — brief-only story, deep reasoning</text>
+  <line x1="430" y1="352" x2="460" y2="352" stroke="#111" stroke-width="1.1"/>
+
+  <!-- 05 sol art -->
+  <rect x="70" y="388" width="360" height="38" rx="4" fill="#ececec" stroke="#111" stroke-width="1.1"/>
+  <text x="86" y="404" font-size="10.5" fill="#111" font-weight="bold">OpenAI · gpt-5.6-sol</text>
+  <text x="86" y="418" font-size="9.5" fill="#555">Art Director — theme, emblem, layout directives</text>
+  <line x1="430" y1="404" x2="460" y2="404" stroke="#111" stroke-width="1.1"/>
+
+  <!-- 07 sol composer -->
+  <rect x="70" y="492" width="360" height="38" rx="4" fill="#ececec" stroke="#111" stroke-width="1.1"/>
+  <text x="86" y="508" font-size="10.5" fill="#111" font-weight="bold">OpenAI · gpt-5.6-sol</text>
+  <text x="86" y="522" font-size="9.5" fill="#555">Deck Composer — copy only, structured output</text>
+  <line x1="430" y1="508" x2="460" y2="508" stroke="#111" stroke-width="1.1"/>
+
+  <!-- 08 sol critic -->
+  <rect x="70" y="544" width="360" height="38" rx="4" fill="#ececec" stroke="#111" stroke-width="1.1"/>
+  <text x="86" y="560" font-size="10.5" fill="#111" font-weight="bold">OpenAI · gpt-5.6-sol</text>
+  <text x="86" y="574" font-size="9.5" fill="#555">Independent Critic — judges with the rubric</text>
+  <line x1="430" y1="560" x2="460" y2="560" stroke="#111" stroke-width="1.1"/>
+
+  <text x="70" y="612" font-size="9" fill="#999">All OpenAI calls: Responses API · strict JSON schema · encrypted reasoning</text>
+
+  <!-- ══ Right: data & rendering tools ══ -->
+  <text x="750" y="152" font-size="10" fill="#999" letter-spacing="2">DATA &amp; RENDERING APIS</text>
+
+  <!-- 02 group: YouTube / HN / GCS -->
+  <rect x="750" y="180" width="360" height="34" rx="4" fill="#ffffff" stroke="#444" stroke-width="1.1" stroke-dasharray="6 3"/>
+  <text x="766" y="195" font-size="10.5" fill="#111" font-weight="bold">YouTube Data API v3</text>
+  <text x="766" y="208" font-size="9" fill="#555">public comments · region-coded discovery · daily quota</text>
+
+  <rect x="750" y="222" width="360" height="34" rx="4" fill="#ffffff" stroke="#444" stroke-width="1.1" stroke-dasharray="6 3"/>
+  <text x="766" y="237" font-size="10.5" fill="#111" font-weight="bold">Hacker News Search API (Algolia)</text>
+  <text x="766" y="250" font-size="9" fill="#555">discussion retrieval · off-topic filtered</text>
+
+  <rect x="750" y="264" width="360" height="34" rx="4" fill="#ffffff" stroke="#444" stroke-width="1.1" stroke-dasharray="6 3"/>
+  <text x="766" y="279" font-size="10.5" fill="#111" font-weight="bold">Google Cloud Storage</text>
+  <text x="766" y="292" font-size="9" fill="#555">research memory — cached by brief seed, TTL</text>
+
+  <path d="M 720 248 L 738 248 L 738 197 L 746 197" fill="none" stroke="#111" stroke-width="1.1" marker-end="url(#arr)"/>
+  <path d="M 738 248 L 746 239" fill="none" stroke="#111" stroke-width="1.1" marker-end="url(#arr)"/>
+  <path d="M 738 248 L 738 281 L 746 281" fill="none" stroke="#777" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrg)" marker-start="url(#arrg)"/>
+
+  <!-- 06 group: Pexels / Unsplash -->
+  <rect x="750" y="424" width="360" height="34" rx="4" fill="#ffffff" stroke="#444" stroke-width="1.1" stroke-dasharray="6 3"/>
+  <text x="766" y="439" font-size="10.5" fill="#111" font-weight="bold">Pexels API</text>
+  <text x="766" y="452" font-size="9" fill="#555">stock photo search · local 80% quota stop</text>
+
+  <rect x="750" y="466" width="360" height="34" rx="4" fill="#ffffff" stroke="#444" stroke-width="1.1" stroke-dasharray="6 3"/>
+  <text x="766" y="481" font-size="10.5" fill="#111" font-weight="bold">Unsplash API</text>
+  <text x="766" y="494" font-size="9" fill="#555">stock photo search · selection tracking</text>
+
+  <path d="M 720 456 L 738 456 L 738 441 L 746 441" fill="none" stroke="#111" stroke-width="1.1" marker-end="url(#arr)"/>
+  <path d="M 738 456 L 738 483 L 746 483" fill="none" stroke="#111" stroke-width="1.1" marker-end="url(#arr)"/>
+
+  <!-- 08 repair dashes to photo APIs -->
+  <path d="M 720 560 L 736 560 L 736 508 " fill="none" stroke="#777" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrg)"/>
+  <text x="744" y="530" font-size="8.5" fill="#777">image re-selection</text>
+
+  <!-- 09 renderer -->
+  <rect x="750" y="596" width="360" height="38" rx="4" fill="#ffffff" stroke="#111" stroke-width="2"/>
+  <text x="766" y="612" font-size="10.5" fill="#111" font-weight="bold">PptxGenJS</text>
+  <text x="766" y="626" font-size="9" fill="#555">native PowerPoint render — charts, diagrams, shape emblem</text>
+  <path d="M 720 612 L 746 612" fill="none" stroke="#111" stroke-width="1.1" marker-end="url(#arr)"/>
+
+  <!-- ══ Legend ══ -->
+  <g font-size="9" fill="#333">
+    <rect x="70" y="738" width="16" height="12" fill="#ececec" stroke="#111" stroke-width="1"/>
+    <text x="92" y="748">OpenAI model role</text>
+    <rect x="200" y="738" width="16" height="12" fill="#161616"/>
+    <text x="222" y="748">xAI Grok</text>
+    <rect x="290" y="738" width="16" height="12" fill="#ffffff" stroke="#444" stroke-width="1" stroke-dasharray="4 2"/>
+    <text x="312" y="748">External API</text>
+    <rect x="400" y="738" width="16" height="12" fill="#fafaf8" stroke="#111" stroke-width="1.6"/>
+    <text x="422" y="748">Deterministic code</text>
+    <line x1="540" y1="744" x2="568" y2="744" stroke="#777" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="576" y="748">cache / repair path</text>
+  </g>
+</svg>
